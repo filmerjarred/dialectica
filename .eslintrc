@@ -1,0 +1,32 @@
+{
+   "env": {
+      "browser": true,
+      "commonjs": true,
+      "es2021": true
+   },
+   "parser": "@typescript-eslint/parser",
+   "root": true,
+
+   "plugins": ["jest", "eslint-plugin-react-memo", "@typescript-eslint"],
+   "extends": ["airbnb-base", "prettier", "eslint:recommended", "plugin:@typescript-eslint/recommended"],
+   "parserOptions": {
+      "ecmaVersion": "latest"
+   },
+   "ignorePatterns": "external-modules",
+   "rules": {
+      "no-unused-vars": ["error", { "destructuredArrayIgnorePattern": "^_" }],
+      "no-use-before-define": [
+         "error",
+         {
+            "functions": false
+         }
+      ],
+      "no-warning-comments": "error",
+      // "guard-for-in": "off",
+      "no-await-in-loop": "off",
+      "no-promise-executor-return": "off",
+      "import/no-unresolved": [2, { "ignore": ["vscode"] }],
+      "prefer-destructuring": "off",
+      "no-restricted-syntax": "off"
+   }
+}
