@@ -365,7 +365,7 @@ export class BoardRecord extends Record<BoardRecord> {
       this.delete()
    }
 
-   fold(n: number) {
+   fold(n: number, textCollapsed: boolean = true) {
       this.cards.forEach((card) => {
          if (
             card.cardLocationType === CardLocationType.DISCUSSION ||
@@ -374,9 +374,12 @@ export class BoardRecord extends Record<BoardRecord> {
             return
 
          if (card.depth >= n) {
-            card.updateLocal({ relatedCollapsed: !!card.children.length, textCollapsed: true })
+            card.updateLocal({
+               relatedCollapsed: !!card.children.length,
+               textCollapsed: card.plainText === "" || textCollapsed,
+            })
          } else {
-            card.updateLocal({ relatedCollapsed: false, textCollapsed: true })
+            card.updateLocal({ relatedCollapsed: false, textCollapsed: card.plainText === "" || textCollapsed })
          }
       })
    }
@@ -402,14 +405,14 @@ class BoardStore extends Store<typeof BoardRecord, BoardRecord> {
             Promise.all(promises)
                .then(() => {
                   if (board.cards.find((c) => c.depth > 2)) {
-                     if (process.env.NODE_ENV === "development") {
-                        board.fold(3)
-                        // setTimeout(() => {
-                        // cardStore.records.get("4516fa4a-e166-4c34-a9e2-9960b4b4ebf2")?.hotseat()
-                        // }, 500)
-                     } else {
-                        board.fold(1)
-                     }
+                     // if (process.env.NODE_ENV === "development") {
+                     board.fold(1, false)
+                     // board.fold(3)
+                     // setTimeout(() => {
+                     // cardStore.records.get("4516fa4a-e166-4c34-a9e2-9960b4b4ebf2")?.hotseat()
+                     // }, 500)
+                     // } else {
+                     // }
                   }
 
                   // TODO (remove this eventually)
