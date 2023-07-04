@@ -645,6 +645,10 @@ export class CardRecord extends Record<CardRecord> {
    focusCursor(element?: "text" | "title", position?: number) {
       cardStore.setSelected(this)
 
+      if (this.local.textCollapsed) {
+         this.toggleText(false)
+      }
+
       const defaultSelection = this.cardLocationType === CardLocationType.PARAGRAPH ? "text" : "title"
 
       this.local.shouldFocusCursor = element || defaultSelection
