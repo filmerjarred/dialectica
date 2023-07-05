@@ -58,6 +58,12 @@ function CardEditorComponent({ card }: { card: CardRecord }) {
       }, [card.text])
    }
 
+   useEffect(() => {
+      return () => {
+         card.local.lexicalParagraphs.length = 0
+      }
+   }, [editor])
+
    const updateText = (text: string) => {
       saveToLocalLog(text)
       card.update({ updatedText: JSON.stringify(text) })

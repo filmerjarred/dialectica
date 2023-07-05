@@ -700,7 +700,11 @@ export class CardRecord extends Record<CardRecord> {
    get show() {
       const card = this
 
-      const cardOrDescendentSelected = card.isSelected || cardStore.currentSelected?.hasAncestor(this)
+      const cardOrDescendentSelected =
+         card.isSelected ||
+         cardStore.currentSelected?.hasAncestor(this) ||
+         cardStore.currentSelected?.paragraphParent === card ||
+         cardStore.currentSelected?.paragraphParent?.hasAncestor(this)
 
       // If it belongs to the logged in user then show it
       if (this.isArchived || this.myUserData.isHidden || this.parent?.local.relatedCollapsed) {
