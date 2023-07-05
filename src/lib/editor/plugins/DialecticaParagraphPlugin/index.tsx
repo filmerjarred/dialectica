@@ -105,7 +105,7 @@ export class DialecticaParagraphNode extends ParagraphNode {
    }
 
    updateCoords(dom: HTMLElement) {
-      // Update coordinates
+      // Update the coordinate informations stored in card.local.paragraphData
       runInAction(() => {
          this.paragraphData.paragraphHeight = dom.offsetHeight
          const margin = parseFloat(dom.style.marginTop)
@@ -150,6 +150,7 @@ export class DialecticaParagraphNode extends ParagraphNode {
          this.registerRelatedCardHeightListener(editor)
       }
 
+      // add node to card "paragraph data" array
       const card = this.card as CardRecord
       if (!card.local.lexicalParagraphs.includes(this.paragraphData)) {
          runInAction(() => {
@@ -164,6 +165,8 @@ export class DialecticaParagraphNode extends ParagraphNode {
       // if (!this.deregisterFn) {
       // this.deregisterFn =
       // todo: figure out how to handle deregister (get's weird once you hide and show text)
+
+      // set the margin whenever the  "relatedCardsHeight" changes
       reaction(
          () => this.paragraphData.relatedCardsHeight,
          (relatedCardsHeight) => {
@@ -176,6 +179,7 @@ export class DialecticaParagraphNode extends ParagraphNode {
                dom.style.margin = `${margin}px 0px`
                this.onChange(editor)
 
+               // update all pagraphraphs after this one
                if (editor) {
                   editor.update(() => {
                      let sib = this.getNextSibling()

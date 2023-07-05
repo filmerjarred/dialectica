@@ -1,12 +1,9 @@
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
-import { LexicalNode } from "lexical"
 import _ from "lodash"
-import { observable, runInAction } from "mobx"
+import { runInAction } from "mobx"
 import { observer } from "mobx-react"
-import { useContext, useEffect, useLayoutEffect, useRef } from "react"
+import { useContext, useEffect, useRef } from "react"
 import { ArcherElement } from "react-archer"
 import { CardLocationType, CardRecord, LexicalParagraphData, Side } from "../lib/card.data"
-import { DialecticaParagraphNode } from "../lib/editor/plugins/DialecticaParagraphPlugin"
 import { getParagraphCardGutterCenterLeft } from "../lib/useArcherRelations"
 import { Cards } from "./Cards"
 import { ArcherRefreshContext } from "./Board"
@@ -57,6 +54,10 @@ export const RelatedParagraphCards = observer(function RelatedParagraphCards({
    const archerContainer = useContext(ArcherRefreshContext)
 
    useEffect(() => {
+      runInAction(() => {
+         paragraph.relatedCardsHeight = 0
+      })
+
       const resizeObserver = new ResizeObserver((entries) => {
          if (entries.length > 0) {
             runInAction(() => {
