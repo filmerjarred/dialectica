@@ -102,7 +102,12 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
 
    const partnerCardsEle =
       !top && partnerCards.length ? (
-         <Cards key={card.id + side + "children"} cards={partnerCards} side={oppositeSide(side)} type={type}></Cards>
+         <Cards
+            key={card.id + side + "partnerChildren"}
+            cards={partnerCards}
+            side={oppositeSide(side)}
+            type={type}
+         ></Cards>
       ) : null
 
    let className = ""

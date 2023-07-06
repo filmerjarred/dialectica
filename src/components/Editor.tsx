@@ -7,7 +7,7 @@ import LexicalEditorComponent from "../lib/editor/LexicalEditor"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
 import _ from "lodash"
 import { saveToLocalLog } from "../lib/localLog"
-import { trace } from "mobx"
+import { runInAction, trace } from "mobx"
 import { TodoRecord, todoStore } from "../lib/todo.data"
 import { lexicalToText } from "../lib/lexicalToText"
 import { RelatedCards } from "./RelatedCards"
@@ -60,7 +60,9 @@ function CardEditorComponent({ card }: { card: CardRecord }) {
 
    useEffect(() => {
       return () => {
-         card.local.lexicalParagraphs.length = 0
+         runInAction(() => {
+            card.local.lexicalParagraphs.length = 0
+         })
       }
    }, [editor])
 
