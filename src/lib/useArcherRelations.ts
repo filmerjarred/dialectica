@@ -7,7 +7,7 @@ export const getCardBorderArcherId = ({ card, gutterItem }: { card: CardRecord; 
    card.id + "-" + card.side + !!gutterItem
 
 export const getRelatedCardsCollapseCircleArcherId = ({ card, side }: { card: CardRecord; side: Side }) =>
-   side === Side.TOP ? card.id : card.id + "-top"
+   card.id + "-" + side
 
 export const getUserCircleArcherId = ({ boardId, side }: { boardId: string; side: Side }) => `${boardId}-${side}`
 

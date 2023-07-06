@@ -39,6 +39,13 @@ export const tagInfo = {
          hiddenOption: false,
       },
       {
+         id: "OKAY",
+         tagType: "AGGREGATE",
+         name: "Read",
+         description: "I read this and it neither seemed right nor wrong",
+         hiddenOption: false,
+      },
+      {
          id: "DISSONANT",
          tagType: "AGGREGATE",
          name: "dissonant",

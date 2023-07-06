@@ -16,6 +16,7 @@ import { LexicalEditor } from "lexical"
 import { tagInfo } from "./tagInfo"
 import { tagStore } from "./tag.data"
 
+export const oppositeSide = (side: Side) => (side === Side.LEFT ? Side.RIGHT : Side.LEFT)
 export enum Side {
    LEFT = "LEFT",
    RIGHT = "RIGHT",
@@ -89,7 +90,7 @@ export class CardRecord extends Record<CardRecord> {
    @observable cardType?: CardMediumType
    @observable cardMediumType!: CardMediumType
 
-   @observable cardIntentionTypeId!: string
+   @observable cardIntentionTypeId!: string | null
 
    @observable ultraZen?: boolean
    @observable exploded?: boolean
@@ -300,7 +301,7 @@ export class CardRecord extends Record<CardRecord> {
       const relatedParagraphCards = this.relatedParagraphCards
 
       return this.local.lexicalParagraphs.flatMap((p) => {
-         const cards = relatedParagraphCards.filter((c) => c.paragraphId === p.id)
+         const cards = relatedParagraphCards.filter((c) => c.show && c.paragraphId === p.id)
          if (!cards.length) return []
          else return [{ paragraph: p, cards }]
       })
@@ -483,7 +484,7 @@ export class CardRecord extends Record<CardRecord> {
       })
    }
 
-   toggleText(val?: boolean) {
+   toggleTextCollapsed(val?: boolean) {
       this.updateLocal({
          textCollapsed: val === undefined ? !this.local.textCollapsed : val,
       })
@@ -646,7 +647,7 @@ export class CardRecord extends Record<CardRecord> {
       cardStore.setSelected(this)
 
       if (this.local.textCollapsed) {
-         this.toggleText(false)
+         this.toggleTextCollapsed(false)
       }
 
       const defaultSelection = this.cardLocationType === CardLocationType.PARAGRAPH ? "text" : "title"
@@ -753,7 +754,7 @@ export class CardRecord extends Record<CardRecord> {
 
          cardMediumType: this.cardMediumType,
          cardLocationType: this.cardLocationType || CardLocationType.POSITION,
-         cardIntentionTypeId: this.cardIntentionTypeId,
+         cardIntentionTypeId: null,
 
          paragraphId: null,
          paragraphParentCardId: this.paragraphParentCardId || null,

@@ -4,7 +4,7 @@
 
 Welcome to Dialectica! 
 
-This sidebar contains helpful information on how to use the app. To hide or show it, click the button above labelled "Help" or press "ctrl + h". To hide or show section of the help, just click it!
+This sidebar contains helpful information on how to use the app. To hide or show it, click the button above labelled "Instructions" or press "ctrl + h". To hide or show section, just click it!
 
 Thank you for helping me beta test this app.
 

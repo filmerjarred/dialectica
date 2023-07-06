@@ -1,5 +1,5 @@
 import _ from "lodash"
-import { CardLocationType, CardRecord, cardStore, Side } from "../lib/card.data"
+import { CardLocationType, CardRecord, cardStore, oppositeSide, Side } from "../lib/card.data"
 import { Card } from "./Card"
 import { observer } from "mobx-react"
 import { useDragDropManager, useDrop } from "react-dnd"
@@ -11,6 +11,7 @@ import { ArcherElement } from "react-archer"
 import { useMemo } from "react"
 import { RelationType } from "react-archer/lib/types"
 import uniqolor from "uniqolor"
+import { getRelatedCardsCollapseCircleArcherId } from "../lib/useArcherRelations"
 
 function DropZone({ card }: { card: CardRecord }) {
    const dragDropManager = useDragDropManager()
@@ -59,8 +60,13 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
    const right = side === Side.RIGHT
    const top = side === Side.TOP
 
-   const children = card.children.filter((c) => c.show)
-   const isAnchor = card.isCentralPosition && !!children.length && !top
+   const toShow = card.children.filter((c) => c.show)
+   const isAnchor = card.isCentralPosition && !!toShow.length && !top
+
+   const children = isAnchor ? toShow.filter((c) => card.ownerUserId === c.ownerUserId) : toShow
+   const partnerCards = isAnchor
+      ? card.children.filter((child) => child.show && child.ownerUserId !== card.ownerUserId)
+      : []
 
    const arrowRelations: RelationType[] = useMemo(() => {
       if (top) {
@@ -74,7 +80,7 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
       } else if (isAnchor) {
          return [
             {
-               targetId: card.parentId || `${card.boardId}-${card.side}`,
+               targetId: getRelatedCardsCollapseCircleArcherId({ card: card.parent!, side }),
                targetAnchor: card.side === Side.LEFT ? "right" : "left",
                sourceAnchor: card.side === Side.LEFT ? "left" : "right",
             },
@@ -95,6 +101,11 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
          <Cards key={card.id + side + "children"} cards={children} side={side} type={type}></Cards>
       ) : null
 
+   const partnerCardsEle =
+      !top && partnerCards.length ? (
+         <Cards key={card.id + side + "children"} cards={partnerCards} side={oppositeSide(side)} type={type}></Cards>
+      ) : null
+
    let className = ""
    if (top) className += " flex flex-col"
 
@@ -110,6 +121,7 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
 
    const cardEle = (
       <Card
+         side={side}
          isTop={top}
          isAnchor={isAnchor}
          card={card}
@@ -117,22 +129,6 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
          inHotseat={card.exploded && card.isMine}
       ></Card>
    )
-
-   const parentChain =
-      0 && card.isSelected && !card.isHotseat && card.ancestorCentralPositions.length > 1 ? (
-         <div className={`overhead-container absolute flex flex-col bottom-[100%]`}>
-            <span>What are we talking about again?</span>
-
-            {card.ancestorCentralPositions.reverse().map((x) => (
-               <div className="mb-1" key={x.id + "overhead"}>
-                  <Card card={x} overhead={true}></Card>
-                  <div className="m-1 flex items-center justify-center" key={x.id + "overhead-chev"}>
-                     <i className="fal fa-chevron-down"></i>
-                  </div>
-               </div>
-            ))}
-         </div>
-      ) : null
 
    return (
       <ArcherElement
@@ -142,46 +138,38 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
       >
          {/* anchor boundary */}
          <div className={className} style={{ background: colour }}>
-            {/* {isAnchor ? (
+            {isAnchor ? (
                <div className="flex justify-center pb-[20px]">
                   <span
-                     className={`p-3 px-4 text-lg bg-white card-drop-shadow font-[500] ${
-                        card.isAgreed ? "agreed" : ""
-                     } ${card.isProvisionallyAgreed ? "provisional-agreed" : ""}`}
+                     className={`pt-3 pb-7 px-4 text-lg  font-[500] ${card.isAgreed ? "agreed" : ""} ${
+                        card.isProvisionallyAgreed ? "provisional-agreed" : ""
+                     }`}
                   >
-                     ⚓ {card.title}
+                     {card.title}
                   </span>
                </div>
-            ) : null} */}
+            ) : null}
 
             {/* card and children */}
             <div className={`flex items-center side-${card.side.toLowerCase()}`}>
                {/* card */}
-               {left ? (
-                  <div className="flex flex-col relative">
-                     {parentChain}
-                     {cardEle}
-                  </div>
-               ) : null}
+               {left ? <div className="flex flex-col relative">{cardEle}</div> : null}
 
                {/* children */}
                <div hidden={top} className="flex-1 related flex flex-col">
                   <div className="flex">
                      {left ? childrenEle : null}
+                     {right ? partnerCardsEle : null}
 
                      {!childrenEle ? <DropZone card={card}></DropZone> : null}
 
+                     {left ? partnerCardsEle : null}
                      {right ? childrenEle : null}
                   </div>
                </div>
 
                {/* card */}
-               {right ? (
-                  <div className="flex flex-col relative">
-                     {parentChain}
-                     {cardEle}
-                  </div>
-               ) : null}
+               {right ? <div className="flex flex-col relative">{cardEle}</div> : null}
             </div>
          </div>
       </ArcherElement>

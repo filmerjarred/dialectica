@@ -1,9 +1,8 @@
-import { useState, useCallback, useRef } from "react"
+import { useCallback, useRef } from "react"
 import {
    cardStore,
    CardRecord,
    Side,
-   toUpperFirst,
    allDescendentAndRoot,
    GutterItem,
    CardMediumType,
@@ -47,9 +46,21 @@ interface CardProps {
    inHotseat?: boolean
    gutterItem?: GutterItem
    gutterSide?: Side
+
+   side: Side
 }
 
-function CardComponent({ card, isTop, isAnchor, overhead, gutterItem, inHotseat, gutterSide, gutterOwner }: CardProps) {
+function CardComponent({
+   card,
+   isTop,
+   isAnchor,
+   overhead,
+   gutterItem,
+   inHotseat,
+   gutterSide,
+   gutterOwner,
+   side,
+}: CardProps) {
    const reactTitleRef = useRef<HTMLInputElement>(null)
 
    const dragDropManager = useDragDropManager()
@@ -89,7 +100,7 @@ function CardComponent({ card, isTop, isAnchor, overhead, gutterItem, inHotseat,
          if (gutterSide === Side.RIGHT) {
             gutterOwner!.updateGutterItem(gutterSide!, gutterItem!, { textCollapsed: !gutterItem!.textCollapsed })
          } else {
-            card.toggleText()
+            card.toggleTextCollapsed()
          }
 
          // }
@@ -144,7 +155,7 @@ function CardComponent({ card, isTop, isAnchor, overhead, gutterItem, inHotseat,
    const { relations } = useArcherRelations({
       card,
       isAnchor,
-      side: isTop ? Side.TOP : card.side,
+      side: isTop ? Side.TOP : side,
       overhead,
       gutterItem,
    })
@@ -293,8 +304,16 @@ function CardComponent({ card, isTop, isAnchor, overhead, gutterItem, inHotseat,
                               <input
                                  tabIndex={1}
                                  onFocus={() => !isTop && !overhead && card.handleInputClick("title")}
+                                 onMouseDown={(e) => {
+                                    if (card.local.textCollapsed) {
+                                       e.preventDefault()
+                                       card.toggleTextCollapsed(false)
+                                    } else {
+                                       card.focusCursor("title")
+                                    }
+                                 }}
                                  placeholder={"Headline..."}
-                                 className="title ellipsis"
+                                 className={`title ellipsis ${card.local.textCollapsed ? "cursor-pointer" : ""}`}
                                  defaultValue={card.isMine ? card.title : undefined}
                                  value={card.isMine ? undefined : card.title}
                                  readOnly={isTop || overhead || !!gutterItem || !card.isMine}
@@ -321,6 +340,7 @@ function CardComponent({ card, isTop, isAnchor, overhead, gutterItem, inHotseat,
                            </span>
                         ) : null}
 
+                        {/* text */}
                         {(() => {
                            if (
                               isTop ||
@@ -363,33 +383,33 @@ function CardComponent({ card, isTop, isAnchor, overhead, gutterItem, inHotseat,
                                  </>
                               )
                         })()}
+
+                        {card.children.length && !isTop && !overhead && !inHotseat && !gutterItem ? (
+                           <ArcherElement
+                              id={getRelatedCardsCollapseCircleArcherId({ card, side: isTop ? Side.TOP : side })}
+                           >
+                              <div
+                                 className={`collapsed-children-indicator-${side.toLowerCase()}`}
+                                 onClick={(e) => {
+                                    if (e.ctrlKey || e.altKey) {
+                                       const val = !card.local.relatedCollapsed
+                                       allDescendentAndRoot(card, (c) => c.toggleRelated(val))
+                                    } else {
+                                       card.toggleRelated()
+                                    }
+                                    e.stopPropagation()
+                                 }}
+                              >
+                                 {card.local.relatedCollapsed ? <span>...</span> : null}
+                              </div>
+                           </ArcherElement>
+                        ) : null}
                      </div>
 
                      <div className="card-bottom-bar">
                         <QuickTagBar card={card}></QuickTagBar>
                      </div>
                   </div>
-
-                  {card.children.length && !isTop && !overhead && !inHotseat && !gutterItem ? (
-                     <ArcherElement
-                        id={getRelatedCardsCollapseCircleArcherId({ card, side: isTop ? Side.TOP : card.side })}
-                     >
-                        <div
-                           className={`collapsed-children-indicator-${card.side.toLowerCase()}`}
-                           onClick={(e) => {
-                              if (e.ctrlKey || e.altKey) {
-                                 const val = !card.local.relatedCollapsed
-                                 allDescendentAndRoot(card, (c) => c.toggleRelated(val))
-                              } else {
-                                 card.toggleRelated()
-                              }
-                              e.stopPropagation()
-                           }}
-                        >
-                           {card.local.relatedCollapsed ? <span>...</span> : null}
-                        </div>
-                     </ArcherElement>
-                  ) : null}
                </div>
             </ArcherElement>
          </div>
@@ -409,7 +429,17 @@ function addEmbed(href: string) {
 
 const ObservedCardComponent = observer(CardComponent)
 
-function CardWrapper({ card, isTop, isAnchor, overhead, gutterItem, gutterSide, inHotseat, gutterOwner }: CardProps) {
+function CardWrapper({
+   card,
+   isTop,
+   isAnchor,
+   overhead,
+   gutterItem,
+   gutterSide,
+   inHotseat,
+   gutterOwner,
+   side,
+}: CardProps) {
    const initialConfig = {
       editorState: card.text,
       namespace: "Card",
@@ -425,6 +455,7 @@ function CardWrapper({ card, isTop, isAnchor, overhead, gutterItem, gutterSide, 
       <LexicalComposer initialConfig={initialConfig}>
          <ObservedCardComponent
             card={card}
+            side={side}
             isTop={isTop}
             isAnchor={isAnchor}
             gutterOwner={gutterOwner}

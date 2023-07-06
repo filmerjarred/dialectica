@@ -406,7 +406,7 @@ class BoardStore extends Store<typeof BoardRecord, BoardRecord> {
                .then(() => {
                   if (board.cards.find((c) => c.depth > 2)) {
                      // if (process.env.NODE_ENV === "development") {
-                     board.fold(1, false)
+                     // board.fold(1, false)
                      // board.fold(3)
                      // setTimeout(() => {
                      // cardStore.records.get("4516fa4a-e166-4c34-a9e2-9960b4b4ebf2")?.hotseat()
@@ -430,7 +430,7 @@ class BoardStore extends Store<typeof BoardRecord, BoardRecord> {
                      }
 
                      if (card.plainText === "" && card.cardLocationType !== CardLocationType.PARAGRAPH) {
-                        card.toggleText(true)
+                        card.toggleTextCollapsed(true)
                      }
                   })
 

@@ -101,6 +101,7 @@ export const cardCommandMap: { [i: string]: CardCommand } = {
 
    TOGGLE_CENTRAL_POSITION: {
       shortcut: "alt+s",
+      name: "Make Sub-board",
       fn: (card) => card.toggleIsCentralPosition(),
    },
 
@@ -163,7 +164,7 @@ export const cardCommandMap: { [i: string]: CardCommand } = {
 
    COLLAPSE_TEXT: {
       shortcut: "alt+",
-      fn: (card) => card.toggleText(),
+      fn: (card) => card.toggleTextCollapsed(),
    },
 
    COLLAPSE_RELATED: {

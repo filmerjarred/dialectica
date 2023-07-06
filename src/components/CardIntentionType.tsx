@@ -25,7 +25,7 @@ export const TagLine = observer(function TagLine({ card }: { card: CardRecord })
             {card.cardIntentionTypeId === "BLANK" ? (
                <span className="hover:bg-[#00a7dfe3] block w-[200px] h-[12px]"></span>
             ) : (
-               <span>{cardIntentionStore.cardIntentionType(card.cardIntentionTypeId).name}</span>
+               <span>{cardIntentionStore.cardIntentionType(card.cardIntentionTypeId!).name}</span>
             )}
          </div>
 

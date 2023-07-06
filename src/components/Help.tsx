@@ -1,6 +1,5 @@
 import { observer } from "mobx-react"
 import { BoardRecord } from "../lib/board.data"
-import React, { useState } from "react"
 import ReactMarkdown from "react-markdown"
 import ReactDom from "react-dom"
 import remarkGfm from "remark-gfm"
@@ -10,6 +9,7 @@ import helpText from "./help-text.md?raw"
 import { userStore } from "../lib/user.data"
 import _ from "lodash"
 import { KeyMapKey, allHotkeys, commandName } from "../lib/hotkeys"
+import { uiStore } from "../lib/ui.data"
 
 const Command = observer(function Command({ id }: { id: KeyMapKey }) {
    if (!allHotkeys[id]) {
@@ -51,6 +51,8 @@ const Section = observer(function Section({ children, id }: { id: KeyMapKey; chi
 })
 
 function HelpComponent() {
+   const user = userStore.getUserRecord()
+
    return (
       <div className="help scrollable">
          <ReactMarkdown
@@ -64,6 +66,12 @@ function HelpComponent() {
             }}
             remarkPlugins={[remarkGfm]}
          ></ReactMarkdown>
+         <div
+            className="absolute right-[10px] top-[10px] cursor-pointer"
+            onClick={() => user.update({ uiShowHelp: false })}
+         >
+            <i className="fas fa-times"></i>
+         </div>
       </div>
    )
 }

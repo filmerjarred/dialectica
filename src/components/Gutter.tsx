@@ -68,6 +68,7 @@ export const Gutter = observer(function Gutter({ side, card }: { side: Side; car
                      gutterItem={item}
                      gutterSide={side}
                      gutterOwner={card}
+                     side={card.side}
                   ></Card>
                )
             }
@@ -89,6 +90,7 @@ export const Gutter = observer(function Gutter({ side, card }: { side: Side; car
                      gutterItem={item}
                      gutterSide={side}
                      gutterOwner={card}
+                     side={card.side}
                   ></Card>
                )
             }
@@ -102,7 +104,15 @@ export const Gutter = observer(function Gutter({ side, card }: { side: Side; car
             const gutterCard = cardStore.records.get(item.cardId)!
             if (!gutterCard) card.removeFromGutter(side, item)
             else {
-               return <Card key={gutterCard.id + "gutter"} card={gutterCard} gutterItem={item} gutterSide={side}></Card>
+               return (
+                  <Card
+                     key={gutterCard.id + "gutter"}
+                     card={gutterCard}
+                     gutterItem={item}
+                     gutterSide={side}
+                     side={card.side}
+                  ></Card>
+               )
             }
          }),
       ]

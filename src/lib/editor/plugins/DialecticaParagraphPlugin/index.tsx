@@ -89,7 +89,9 @@ export class DialecticaParagraphNode extends ParagraphNode {
       // if (this.card.type === CardBoardType.PARAGRAPH) {
       //    dom.className += " bracket-borders"
       // } else {
-      const hasRelatedCards = this.card.relatedParagraphCards.some((c) => c.paragraphId === this.paragraphData.id)
+      const hasRelatedCards = this.card.relatedParagraphCards.some(
+         (c) => c.show && c.paragraphId === this.paragraphData.id
+      )
 
       if (hasRelatedCards) {
          if (!dom.className.includes("bracket-borders")) {

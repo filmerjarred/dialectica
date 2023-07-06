@@ -22,7 +22,7 @@ export class CardIntentionRecord {
 
 class CardIntentionStore {
    // class CardIntentionStore extends Store<typeof CardIntentionRecord, CardIntentionRecord> {
-   cardIntentionType(cardIntentionTypeId: string): CardIntentionRecord {
+   cardIntentionType(cardIntentionTypeId: string | null): CardIntentionRecord {
       const info = this.cardIntentionTypes().find((t) => t.id === cardIntentionTypeId)
       if (!info) {
          return this.cardIntentionType("BLANK")
@@ -99,8 +99,15 @@ class CardIntentionStore {
          {
             id: "QUESTION",
             name: "Question",
-            text: "I'm confused...",
-            description: "Ask for clarification or elaboration",
+            text: "",
+            description: "",
+            cardLocationTypes: null,
+         },
+         {
+            id: "ANSWER",
+            name: "Answer",
+            text: "",
+            description: "",
             cardLocationTypes: null,
          },
       ]

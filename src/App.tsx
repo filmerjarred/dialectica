@@ -187,7 +187,7 @@ export const App = observer(function App() {
                   📂 Explorer
                </button>
                <button className="ml-2" onClick={() => userRecord.toggleShowHelp()}>
-                  🙏 Help
+                  📑 Instructions
                </button>
                <button className="ml-2" onClick={exportToMarkdown}>
                   📤 Export
