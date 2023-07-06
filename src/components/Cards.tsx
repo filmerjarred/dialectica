@@ -11,7 +11,6 @@ import { ArcherElement } from "react-archer"
 import { useMemo } from "react"
 import { RelationType } from "react-archer/lib/types"
 import uniqolor from "uniqolor"
-import { getRelatedCardsCollapseCircleArcherId } from "../lib/useArcherRelations"
 
 function DropZone({ card }: { card: CardRecord }) {
    const dragDropManager = useDragDropManager()
@@ -80,7 +79,7 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
       } else if (isAnchor) {
          return [
             {
-               targetId: getRelatedCardsCollapseCircleArcherId({ card: card.parent!, side }),
+               targetId: card.parentId ? `${card.parentId}-${card.side}` : `${card.boardId}-${card.side}`,
                targetAnchor: card.side === Side.LEFT ? "right" : "left",
                sourceAnchor: card.side === Side.LEFT ? "left" : "right",
             },
@@ -141,7 +140,7 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
             {isAnchor ? (
                <div className="flex justify-center pb-[20px]">
                   <span
-                     className={`pt-3 pb-7 px-4 text-lg  font-[500] ${card.isAgreed ? "agreed" : ""} ${
+                     className={`pt-3 pb-4 px-4 text-lg  font-[500] ${card.isAgreed ? "agreed" : ""} ${
                         card.isProvisionallyAgreed ? "provisional-agreed" : ""
                      }`}
                   >
