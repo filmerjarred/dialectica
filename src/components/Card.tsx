@@ -90,14 +90,12 @@ function CardComponent({
 
    const portraitClick = useCallback(
       (e: any) => {
-         // if (e.ctrlKey || e.altKey) {
-         // const val = !card.local.textCollapsed
-         // allDescendentAndRoot(card, (c) => c.toggleText(val))
-         // } else {
-
          if (card.cardLocationType === CardLocationType.PARAGRAPH) return
 
-         if (gutterSide === Side.RIGHT) {
+         if (e.ctrlKey || e.altKey) {
+            const val = !card.local.textCollapsed
+            allDescendentAndRoot(card, (c) => c.toggleTextCollapsed(val))
+         } else if (gutterSide === Side.RIGHT) {
             gutterOwner!.updateGutterItem(gutterSide!, gutterItem!, { textCollapsed: !gutterItem!.textCollapsed })
          } else {
             card.toggleTextCollapsed()
@@ -305,6 +303,8 @@ function CardComponent({
                                  tabIndex={1}
                                  onFocus={() => !isTop && !overhead && card.handleInputClick("title")}
                                  onMouseDown={(e) => {
+                                    if (e.button !== 0) return
+
                                     if (card.local.textCollapsed) {
                                        e.preventDefault()
                                        card.toggleTextCollapsed(false)
