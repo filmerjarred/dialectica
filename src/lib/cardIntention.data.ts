@@ -1,9 +1,4 @@
-import autoBind from "auto-bind"
-import { observable } from "mobx"
-import { Record, Store } from "./makeStore"
-import { tagInfo } from "./tagInfo"
 import { CardLocationType } from "./card.data"
-import { isDev } from "./isDev"
 
 export class CardIntentionRecord {
    // export class CardIntentionRecord extends Record<CardIntentionRecord> {

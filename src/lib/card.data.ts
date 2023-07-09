@@ -15,6 +15,7 @@ import { toast } from "react-toastify"
 import { LexicalEditor } from "lexical"
 import { tagInfo } from "./tagInfo"
 import { tagStore } from "./tag.data"
+import { cardIntentionStore } from "./cardIntention.data"
 
 export const oppositeSide = (side: Side) => (side === Side.LEFT ? Side.RIGHT : Side.LEFT)
 export enum Side {
@@ -720,6 +721,9 @@ export class CardRecord extends Record<CardRecord> {
    newPeer(data?: Partial<CardRecord>) {
       const user = getUser()
 
+      const cardIntentionTypeId =
+         this.cardLocationType === CardLocationType.PARAGRAPH && !this.parentId ? "PARAPHRASE" : null
+
       const newCard = cardStore.create({
          order: this.order + 1,
          parentId: this.parentId,
@@ -731,7 +735,7 @@ export class CardRecord extends Record<CardRecord> {
 
          cardMediumType: this.cardMediumType,
          cardLocationType: this.cardLocationType || CardLocationType.POSITION,
-         cardIntentionTypeId: this.cardIntentionTypeId,
+         cardIntentionTypeId: cardIntentionTypeId,
          ...data,
       })
 

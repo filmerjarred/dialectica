@@ -161,7 +161,7 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
 
                {/* children */}
                <div hidden={top} className="flex-1 related flex flex-col">
-                  <div className="flex">
+                  <div className="flex items-center">
                      {left ? childrenEle : null}
                      {right ? partnerCardsEle : null}
 
