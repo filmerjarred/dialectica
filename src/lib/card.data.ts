@@ -55,14 +55,16 @@ interface CardUserData {
 
 export class LexicalParagraphData {
    id: string
+   editorId?: string
 
    @observable paragraphHeight?: number
    @observable paragraphY?: number
 
    @observable relatedCardsHeight?: number
 
-   constructor(id: string) {
+   constructor(id: string, editorId: string) {
       this.id = id
+      this.editorId = editorId
    }
 }
 
@@ -129,7 +131,7 @@ export class CardRecord extends Record<CardRecord> {
       [i: string]: CardUserData
    }
 
-   @observable local!: {
+   @observable.deep local!: {
       paragraphHeight?: number
       paragraphY?: number
       cardHeight?: number
@@ -298,10 +300,12 @@ export class CardRecord extends Record<CardRecord> {
          .value()
    }
 
-   @computed get lexicalParagraphAndCards() {
+   @computed get lexicalParagraphsWithCards() {
       const relatedParagraphCards = this.relatedParagraphCards
 
       return this.local.lexicalParagraphs.flatMap((p) => {
+         if (p.editorId !== this.localNonObserved.lexicalEditor?._config.theme.id) return []
+
          const cards = relatedParagraphCards.filter((c) => c.show && c.paragraphId === p.id)
          if (!cards.length) return []
          else return [{ paragraph: p, cards }]
@@ -553,7 +557,7 @@ export class CardRecord extends Record<CardRecord> {
       }
 
       if (this.cardLocationType === CardLocationType.PARAGRAPH) {
-         const paragraphData = this.paragraphParent?.lexicalParagraphAndCards.find(
+         const paragraphData = this.paragraphParent?.lexicalParagraphsWithCards.find(
             (p) => p.paragraph.id === this.paragraphId
          )?.paragraph
          this.delete()

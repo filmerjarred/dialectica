@@ -22,12 +22,12 @@ function getDepth(cards: CardRecord[], i: number = 1): number {
 }
 
 export const RelatedCards = observer(function RelatedCards({ card }: { card: CardRecord }) {
-   if (!card.lexicalParagraphAndCards.length) return null
+   if (!card.lexicalParagraphsWithCards.length) return null
 
    const depth = getDepth(card.relatedParagraphCards)
    return (
       <div className="relative flex-1" style={{ minWidth: 635 * depth }}>
-         {_.map(card.lexicalParagraphAndCards, (p) => (
+         {_.map(card.lexicalParagraphsWithCards, (p) => (
             <RelatedParagraphCards
                key={card.id + p.paragraph.id}
                parentCardId={card.id}
@@ -55,7 +55,7 @@ export const RelatedParagraphCards = observer(function RelatedParagraphCards({
 
    useEffect(() => {
       runInAction(() => {
-         paragraph.relatedCardsHeight = 0
+         paragraph.relatedCardsHeight = -1
       })
 
       const resizeObserver = new ResizeObserver((entries) => {
@@ -69,7 +69,7 @@ export const RelatedParagraphCards = observer(function RelatedParagraphCards({
       resizeObserver.observe(ref.current!)
 
       return () => resizeObserver.disconnect()
-   }, [])
+   }, [paragraph.editorId])
 
    useEffect(() => {
       if (archerContainer.current) {

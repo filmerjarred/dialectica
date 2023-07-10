@@ -26,6 +26,7 @@ import { uiStore } from "../lib/ui.data"
 import { runInAction } from "mobx"
 import { useCardDrop } from "../lib/cardDrop"
 import { Gutter } from "./Gutter"
+import { uuidv4 } from "@firebase/util"
 
 import { SquiggleEditor } from "@quri/squiggle-components"
 import {
@@ -448,7 +449,7 @@ function CardWrapper({
       onError: (error: Error) => {
          throw error
       },
-      theme: { ...PlaygroundEditorTheme, card },
+      theme: { ...PlaygroundEditorTheme, card, id: uuidv4() },
    }
 
    return (

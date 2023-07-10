@@ -48,7 +48,11 @@ export class DialecticaParagraphNode extends ParagraphNode {
 
    constructor(id: string, paragraphData?: LexicalParagraphData, key?: NodeKey, card?: CardRecord) {
       super(key)
-      this.paragraphData = paragraphData || makeObservable(new LexicalParagraphData(id))
+      const editorId = card?.localNonObserved.lexicalEditor?._config.theme.id
+
+      this.paragraphData = paragraphData || makeObservable(new LexicalParagraphData(id, editorId))
+      this.paragraphData.editorId = editorId
+
       this.card = card
    }
 
@@ -66,11 +70,20 @@ export class DialecticaParagraphNode extends ParagraphNode {
       return node
    }
 
+   findParagraphDataInCard() {
+      return this.card?.local.lexicalParagraphs.find(
+         (p) => p.id === this.paragraphData.id && p.editorId === this.paragraphData.editorId
+      )
+   }
+
    remove(preserveEmptyParent?: boolean | undefined) {
       console.log("removed", this.__key)
       runInAction(() => {
-         if (this.card) {
-            _.remove(this.card.local.lexicalParagraphs, (p) => p.id === this.paragraphData.id)
+         // This is the way it is because the same paragraph node can be
+         // re-instantiated multiple times across different editors
+         const paragraphData = this.findParagraphDataInCard()
+         if (this.card && paragraphData) {
+            _.remove(this.card.local.lexicalParagraphs, this.findParagraphDataInCard())
          }
       })
       return super.remove(preserveEmptyParent)
@@ -137,27 +150,28 @@ export class DialecticaParagraphNode extends ParagraphNode {
       }
 
       if (editor) {
+         // check to see if it's been copy pasted and this paragraph is "already in"
          const nodes = editor.getEditorState()._nodeMap
          const alreadyIn = Array.from(nodes.values()).some((node) => {
             if (!$isDialecticaParagraphNode(node)) return false
             if (!editor.getElementByKey(node.getKey())) return false
             return node.paragraphData.id === this.paragraphData.id
          })
-
          if (alreadyIn) {
-            // has been copy pasted
             this.paragraphData.id = uuidv4()
          }
 
          this.registerRelatedCardHeightListener(editor)
-      }
 
-      // add node to card "paragraph data" array
-      const card = this.card as CardRecord
-      if (!card.local.lexicalParagraphs.includes(this.paragraphData)) {
-         runInAction(() => {
-            card.local.lexicalParagraphs.push(this.paragraphData)
-         })
+         // add node to card "paragraph data" array
+         const card = this.card as CardRecord
+         this.paragraphData.editorId = editor._config.theme.id
+
+         if (!this.findParagraphDataInCard()) {
+            runInAction(() => {
+               card.local.lexicalParagraphs.push(this.paragraphData)
+            })
+         }
       }
 
       return dom

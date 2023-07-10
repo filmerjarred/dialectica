@@ -61,7 +61,8 @@ function CardEditorComponent({ card }: { card: CardRecord }) {
    useEffect(() => {
       return () => {
          runInAction(() => {
-            card.local.lexicalParagraphs.length = 0
+            // only remove paragraphs that are from old editor
+            _.remove(card.local.lexicalParagraphs, (p) => p.editorId === editor._config.theme.id)
          })
       }
    }, [editor])
