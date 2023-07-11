@@ -4,11 +4,11 @@ import { Card } from "./Card"
 import { observer } from "mobx-react"
 import { useDragDropManager, useDrop } from "react-dnd"
 import { DragAndDropTypes } from "./Board"
-import { trace } from "mobx"
+import { reaction, trace } from "mobx"
 import { getUser } from "../lib/useUser"
 import { useCardDrop } from "../lib/cardDrop"
 import { ArcherElement } from "react-archer"
-import { useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { RelationType } from "react-archer/lib/types"
 import uniqolor from "uniqolor"
 
@@ -38,13 +38,13 @@ function CardsComponent({ cards, side, type }: { cards: CardRecord[]; side: Side
 
    const top = side === Side.TOP
 
-   let className = "gap-5"
+   let className = ""
    if (!top) className += " flex-col"
-   // if (type == CardBoardType.PARAGRAPH) className += " gap-4"
-   // if (type !== CardBoardType.PARAGRAPH) className += " gap-4"
+   if (type == CardLocationType.PARAGRAPH) className += " gap-5"
+   if (type !== CardLocationType.PARAGRAPH) className += " gap-20"
 
    return (
-      <div className={`flex cards w-full ${className}`}>
+      <div className={`cards ${className}`}>
          {sortedCards.map((card) => {
             if (!top && !card.show) return null
 
@@ -55,17 +55,18 @@ function CardsComponent({ cards, side, type }: { cards: CardRecord[]; side: Side
 }
 
 function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; side: Side; type: CardLocationType }) {
+   const cardColumnRef = useRef<HTMLDivElement>(null)
+   const reactTextWrapperRef = useRef<HTMLDivElement>(null)
+
    const left = side === Side.LEFT || side === Side.TOP
    const right = side === Side.RIGHT
    const top = side === Side.TOP
 
-   const toShow = card.children.filter((c) => c.show)
-   const isAnchor = card.isCentralPosition && !!toShow.length && !top
+   const toShow = card.shownChildren
+   const isSubBoard = card.isCentralPosition && !!toShow.length && !top
 
-   const children = isAnchor ? toShow.filter((c) => card.ownerUserId === c.ownerUserId) : toShow
-   const partnerCards = isAnchor
-      ? card.children.filter((child) => child.show && child.ownerUserId !== card.ownerUserId)
-      : []
+   const children = isSubBoard ? toShow.filter((c) => card.ownerUserId === c.ownerUserId) : toShow
+   const partnerCards = isSubBoard ? card.shownChildren.filter((child) => child.ownerUserId !== card.ownerUserId) : []
 
    const arrowRelations: RelationType[] = useMemo(() => {
       if (top) {
@@ -76,7 +77,7 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
                sourceAnchor: "top",
             },
          ]
-      } else if (isAnchor) {
+      } else if (isSubBoard) {
          return [
             {
                targetId: card.parentId ? `${card.parentId}-${card.side}` : `${card.boardId}-${card.side}`,
@@ -93,7 +94,37 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
          //       },
          //    ]
       } else return []
-   }, [isAnchor])
+   }, [isSubBoard])
+
+   useEffect(() => {
+      // const resizeObserver = new ResizeObserver((entries) => {
+      //    if (entries.length > 0) {
+      //       if (!cardColumnRef.current || !reactTextWrapperRef.current) return
+      //       if (!card.local.textCollapsed) {
+      //          reactTextWrapperRef.current.style.marginBottom = "0px"
+      //          cardColumnRef.current.style.minHeight = "0px"
+      //       } else {
+      //          // reactTextWrapperRef.current.style.marginBottom = `-200%`
+      //          cardColumnRef.current.style.marginBottom = `-${reactTextWrapperRef.current?.offsetHeight || 0}px`
+      //       }
+      //    }
+      // })
+      // resizeObserver.observe(reactTextWrapperRef.current!)
+      // return () => resizeObserver.disconnect()
+      // return reaction(
+      //    () => card.local.textCollapsed,
+      //    (textCollapsed) => {
+      //       if (!cardColumnRef.current || !reactTextWrapperRef.current) return
+      //       if (textCollapsed) {
+      //          cardColumnRef.current.style.marginBottom = `-${reactTextWrapperRef.current?.offsetHeight || 0}px`
+      //          // reactTextWrapperRef.current.style.marginBottom = `-200%`
+      //       } else {
+      //          reactTextWrapperRef.current.style.marginBottom = "0px"
+      //          cardColumnRef.current.style.minHeight = "0px"
+      //       }
+      //    }
+      // )
+   }, [])
 
    const childrenEle =
       !top && children.length ? (
@@ -114,24 +145,27 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
    if (top) className += " flex flex-col"
 
    let colour = "transparent"
-   if (isAnchor) {
-      className += " card-anchor"
+   if (isSubBoard) {
+      className += " card-sub-board"
 
       colour = uniqolor(card.id, {
-         saturation: [50, 100],
+         saturation: [60, 100],
          lightness: 95,
       }).color
    }
 
    const cardEle = (
-      <Card
-         side={side}
-         isTop={top}
-         isAnchor={isAnchor}
-         card={card}
-         key={card.id + side}
-         inHotseat={card.exploded && card.isMine}
-      ></Card>
+      <div ref={cardColumnRef} className="card-column">
+         <Card
+            side={side}
+            reactTextWrapperRef={reactTextWrapperRef}
+            isTop={top}
+            isAnchor={isSubBoard}
+            card={card}
+            key={card.id + side}
+            inHotseat={card.exploded && card.isMine}
+         ></Card>
+      </div>
    )
 
    return (
@@ -140,9 +174,10 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
          relations={arrowRelations}
          key={card.id + side + "cardAndRelated"}
       >
-         {/* anchor boundary */}
+         {/* card-sub-board boundary */}
          <div className={className} style={{ background: colour }}>
-            {isAnchor ? (
+            {/* <div className={className} style={{ background: colour }}> */}
+            {isSubBoard ? (
                <div className="flex justify-center pb-[20px]">
                   <span
                      className={`pt-3 pb-4 px-4 text-lg  font-[500] ${card.isAgreed ? "agreed" : ""} ${
@@ -155,12 +190,12 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
             ) : null}
 
             {/* card and children */}
-            <div className={`flex items-center side-${card.side.toLowerCase()}`}>
+            <div className={`card-with-child-cards side-${card.side.toLowerCase()}`}>
                {/* card */}
-               {left ? <div className="flex flex-col relative">{cardEle}</div> : null}
+               {left ? cardEle : null}
 
                {/* children */}
-               <div hidden={top} className="flex-1 related flex flex-col">
+               <div hidden={top} className="child-cards related">
                   <div className="flex items-center">
                      {left ? childrenEle : null}
                      {right ? partnerCardsEle : null}
@@ -173,7 +208,7 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
                </div>
 
                {/* card */}
-               {right ? <div className="flex flex-col relative">{cardEle}</div> : null}
+               {right ? cardEle : null}
             </div>
          </div>
       </ArcherElement>

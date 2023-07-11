@@ -169,6 +169,6 @@ export const cardCommandMap: { [i: string]: CardCommand } = {
 
    COLLAPSE_RELATED: {
       shortcut: "alt+w",
-      fn: (card) => card.toggleRelated(),
+      fn: (card) => card.toggleRelatedCollapsed(),
    },
 }

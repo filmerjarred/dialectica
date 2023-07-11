@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import {
    cardStore,
    CardRecord,
@@ -7,6 +7,8 @@ import {
    GutterItem,
    CardMediumType,
    CardLocationType,
+   RollControl,
+   allAncestors,
 } from "../lib/card.data"
 import _ from "lodash"
 import { useCardContextMenu } from "./CardContextMenu"
@@ -47,7 +49,7 @@ interface CardProps {
    inHotseat?: boolean
    gutterItem?: GutterItem
    gutterSide?: Side
-
+   reactTextWrapperRef: React.RefObject<HTMLDivElement>
    side: Side
 }
 
@@ -58,11 +60,13 @@ function CardComponent({
    overhead,
    gutterItem,
    inHotseat,
+   reactTextWrapperRef,
    gutterSide,
    gutterOwner,
    side,
 }: CardProps) {
    const reactTitleRef = useRef<HTMLInputElement>(null)
+   const reactCardWrapperRef = useRef<HTMLInputElement>(null)
 
    const dragDropManager = useDragDropManager()
    const isDragging = dragDropManager.getMonitor().isDragging()
@@ -151,6 +155,20 @@ function CardComponent({
       [card, card.isSelected, card.local.shouldFocusCursor, card.local.shouldCenterScreen]
    )
 
+   // useEffect(() => {
+   //    const resizeObserver = new ResizeObserver((entries) => {
+   //       if (!reactCardWrapperRef.current || !reactTextWrapperRef.current) return
+
+   //       if (entries.length > 0) {
+   //          reactCardWrapperRef.current.style.marginBottom = `${reactTextWrapperRef.current?.offsetHeight || 0}px`
+   //       }
+   //    })
+
+   //    resizeObserver.observe(reactTextWrapperRef.current!)
+
+   //    return () => resizeObserver.disconnect()
+   // }, [reactTextWrapperRef.current, reactCardWrapperRef.current])
+
    const { relations } = useArcherRelations({
       card,
       isAnchor,
@@ -182,15 +200,26 @@ function CardComponent({
    if (overhead) className += " overhead"
    if (inHotseat) className += " card-hotseat"
 
+   if (card.local.rollControlHovered) className += " parent-roll-hovered"
+
    let cardContentClassName = "card-content"
    if (card.cardLocationType === CardLocationType.PARAGRAPH) cardContentClassName += " paragraph-card min-w-[590px]"
    if (card.cardLocationType !== CardLocationType.PARAGRAPH) cardContentClassName += " board-card min-w-[590px]"
+   if (
+      card.cardLocationType !== CardLocationType.PARAGRAPH &&
+      cardStore.currentSelected &&
+      cardStore.currentSelected !== card &&
+      !card.relatedParagraphCards.includes(cardStore.currentSelected)
+   ) {
+      cardContentClassName += " opacity-20"
+   }
 
    return (
       <div
          className={`card-and-gutter-wrapper ${inHotseat ? "hotseat" : ""}`}
          // @ts-ignore
          ref={cardRef}
+         tabIndex={-1}
          onClick={(e) => {
             console.log(card)
             if (e.altKey || e.ctrlKey) {
@@ -202,7 +231,7 @@ function CardComponent({
       >
          {inHotseat ? <Gutter card={card} side={Side.LEFT}></Gutter> : null}
 
-         <div className={`card-wrapper ${inHotseat ? "hotseat" : ""}`}>
+         <div ref={reactCardWrapperRef} className={`card-wrapper ${inHotseat ? "hotseat" : ""}`}>
             <ArcherElement id={getCardBorderArcherId({ card, gutterItem })} relations={relations}>
                <div
                   tabIndex={-1}
@@ -342,68 +371,153 @@ function CardComponent({
                         ) : null}
 
                         {/* text */}
-                        {(() => {
-                           if (
-                              isTop ||
-                              overhead ||
-                              (gutterSide === Side.RIGHT ? gutterItem!.textCollapsed : card.local.textCollapsed)
-                           )
-                              return
-
-                           if (card.cardMediumType === CardMediumType.FREE_TEXT)
-                              return <Editor cardOrTodo={card} textOrTitle="text"></Editor>
-
-                           if (card.cardMediumType === CardMediumType.SQUIGGLE)
-                              return (
-                                 // @ts-ignore
-                                 <SquiggleEditor
-                                    defaultCode={card.squiggleCode}
-                                    onChange={function Ra() {}}
-                                    onCodeChange={function Ra(code) {
-                                       card.update({ squiggleCode: code })
-                                    }}
-                                 />
+                        <div className="text-wrapper" ref={reactTextWrapperRef}>
+                           {(() => {
+                              if (
+                                 isTop ||
+                                 overhead ||
+                                 (gutterSide === Side.RIGHT ? gutterItem!.textCollapsed : card.local.textCollapsed)
                               )
+                                 return
 
-                           if (card.cardMediumType === CardMediumType.MANIFOLD)
-                              return (
-                                 <>
-                                    <input
-                                       className="outline-none w-full p-2 ml-3"
-                                       placeholder="Enter link to market"
-                                       defaultValue={card.manifoldUrl}
-                                       onChange={(e) => card.update({ manifoldUrl: e.target.value })}
-                                    ></input>
+                              if (card.cardMediumType === CardMediumType.FREE_TEXT)
+                                 return <Editor cardOrTodo={card} textOrTitle="text"></Editor>
 
-                                    {card.manifoldUrl ? (
-                                       <iframe
-                                          style={{ width: "100%", height: "400px", border: "none" }}
-                                          src={addEmbed(card.manifoldUrl)}
-                                       />
-                                    ) : null}
-                                 </>
-                              )
-                        })()}
+                              if (card.cardMediumType === CardMediumType.SQUIGGLE)
+                                 return (
+                                    // @ts-ignore
+                                    <SquiggleEditor
+                                       defaultCode={card.squiggleCode}
+                                       onChange={function Ra() {}}
+                                       onCodeChange={function Ra(code) {
+                                          card.update({ squiggleCode: code })
+                                       }}
+                                    />
+                                 )
+
+                              if (card.cardMediumType === CardMediumType.MANIFOLD)
+                                 return (
+                                    <>
+                                       <input
+                                          className="outline-none w-full p-2 ml-3"
+                                          placeholder="Enter link to market"
+                                          defaultValue={card.manifoldUrl}
+                                          onChange={(e) => card.update({ manifoldUrl: e.target.value })}
+                                       ></input>
+
+                                       {card.manifoldUrl ? (
+                                          <iframe
+                                             style={{ width: "100%", height: "400px", border: "none" }}
+                                             src={addEmbed(card.manifoldUrl)}
+                                          />
+                                       ) : null}
+                                    </>
+                                 )
+                           })()}
+                        </div>
+
+                        {/* controls of assorted dispositions */}
+                        <div className={"card-controls text-controls"}>
+                           <div
+                              onClick={(e) => {
+                                 card.toggleTextCollapsed()
+                              }}
+                              className={`control-circle control-circle-small pb-[1px] text-[9px]`}
+                              title="Show / hide child cards"
+                           >
+                              {card.local.textCollapsed ? (
+                                 <i className="fal fa-chevron-up"></i>
+                              ) : (
+                                 <i className="fal fa-chevron-down"></i>
+                              )}
+                           </div>
+
+                           <div
+                              onClick={(e) => {
+                                 card.collapseAllText()
+                              }}
+                              className={`control-circle control-circle-large`}
+                              title="Show / hide child cards"
+                           >
+                              <i className="fal fa-chevron-double-up"></i>
+                           </div>
+
+                           <div
+                              onClick={(e) => {
+                                 card.uncollapseAllText()
+                              }}
+                              className={`control-circle control-circle-large`}
+                              title="Show / hide child cards"
+                           >
+                              <i className="fal fa-chevron-double-down"></i>
+                           </div>
+                        </div>
 
                         {card.children.length && !isTop && !overhead && !inHotseat && !gutterItem ? (
-                           <ArcherElement
-                              id={getRelatedCardsCollapseCircleArcherId({ card, side: isTop ? Side.TOP : side })}
-                           >
+                           <div className={`card-controls children-controls-${side.toLowerCase()}`}>
                               <div
-                                 className={`collapsed-children-indicator-${side.toLowerCase()}`}
-                                 onClick={(e) => {
-                                    if (e.ctrlKey || e.altKey) {
-                                       const val = !card.local.relatedCollapsed
-                                       allDescendentAndRoot(card, (c) => c.toggleRelated(val))
-                                    } else {
-                                       card.toggleRelated()
-                                    }
-                                    e.stopPropagation()
-                                 }}
+                                 title="Unroll one layer at the outermost edge of the tree"
+                                 className={`control-circle control-circle-large pl-[1px]`}
+                                 onClick={(e) => card.unroll()}
                               >
-                                 {card.local.relatedCollapsed ? <span>...</span> : null}
+                                 <i className="fal fa-chevron-right"></i>
                               </div>
-                           </ArcherElement>
+
+                              <div
+                                 className={`control-circle control-circle-large pl-[2px]`}
+                                 title="Unroll all cards downstream of this card"
+                                 onClick={(e) => card.unrollAll()}
+                              >
+                                 <i className="fal fa-chevron-double-right"></i>
+                              </div>
+
+                              <ArcherElement
+                                 id={getRelatedCardsCollapseCircleArcherId({ card, side: isTop ? Side.TOP : side })}
+                              >
+                                 <div
+                                    className={`control-circle control-circle-small collapsed-children-indicator-${side.toLowerCase()}`}
+                                    title="Show / hide child cards"
+                                    onClick={(e) => {
+                                       if (e.ctrlKey || e.altKey) {
+                                          const val = !card.local.relatedCollapsed
+                                          allDescendentAndRoot(card, (c) => c.toggleRelatedCollapsed(val))
+                                       } else {
+                                          card.toggleRelatedCollapsed()
+                                       }
+                                       e.stopPropagation()
+                                    }}
+                                 >
+                                    {card.local.relatedCollapsed ? <span>...</span> : null}
+                                 </div>
+                              </ArcherElement>
+
+                              <div
+                                 onMouseOver={() => card.updateRollAllOutlines(true)}
+                                 onMouseLeave={() => card.updateRollAllOutlines(false)}
+                                 title="Roll up all cards downstream of this card"
+                                 onClick={(e) => {
+                                    card.rollAll()
+                                    cardStore.setSelected(null)
+                                 }}
+                                 className={`control-circle control-circle-large`}
+                              >
+                                 <i className="fal fa-chevron-double-left"></i>
+                              </div>
+
+                              <div
+                                 className={`control-circle control-circle-large pr-[2px]`}
+                                 title="Roll up the outermost edge of the tree one layer"
+                                 onClick={(e) => {
+                                    card.roll()
+                                    cardStore.setSelected(null)
+                                    card.updateRollOutlines(true)
+                                 }}
+                                 onMouseOver={() => card.updateRollOutlines(true)}
+                                 onMouseLeave={() => card.updateRollOutlines(false)}
+                              >
+                                 <i className="fal fa-chevron-left"></i>
+                              </div>
+                           </div>
                         ) : null}
                      </div>
 
@@ -439,6 +553,7 @@ function CardWrapper({
    gutterSide,
    inHotseat,
    gutterOwner,
+   reactTextWrapperRef,
    side,
 }: CardProps) {
    const initialConfig = {
@@ -456,6 +571,7 @@ function CardWrapper({
       <LexicalComposer initialConfig={initialConfig}>
          <ObservedCardComponent
             card={card}
+            reactTextWrapperRef={reactTextWrapperRef}
             side={side}
             isTop={isTop}
             isAnchor={isAnchor}

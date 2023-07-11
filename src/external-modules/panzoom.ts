@@ -168,6 +168,7 @@
                      moveBy: internalMoveBy,
                      moveTo: moveTo,
                      smoothMoveTo: smoothMoveTo,
+                     internalMoveBy: internalMoveBy,
                      centerOn: centerOn,
                      zoomTo: publicZoomTo,
                      zoomAbs: zoomAbs,

@@ -24,6 +24,13 @@ export enum Side {
    TOP = "TOP",
 }
 
+export enum RollControl {
+   UNROLL_ALL,
+   UNROLL,
+   ROLL_ALL,
+   ROLL,
+}
+
 export enum CardLocationType {
    DISCUSSION = "DISCUSSION",
    POSITION = "POSITION",
@@ -136,6 +143,8 @@ export class CardRecord extends Record<CardRecord> {
       paragraphY?: number
       cardHeight?: number
 
+      rollControlHovered: boolean
+
       lexicalParagraphs: LexicalParagraphData[]
 
       ref?: React.LegacyRef<HTMLDivElement>
@@ -182,6 +191,8 @@ export class CardRecord extends Record<CardRecord> {
       cardMediumType: CardMediumType.FREE_TEXT,
       cardIntentionTypeId: "BLANK",
       cardLocationType: CardLocationType.POSITION,
+
+      rollControlHovered: false,
 
       squiggleCode: "normal(5,2)",
 
@@ -318,6 +329,11 @@ export class CardRecord extends Record<CardRecord> {
          .filter((card) => card.parentId === this.id && card.cardLocationType === this.cardLocationType)
          .sortBy((c) => c.order)
          .value()
+   }
+
+   @computed.struct
+   get shownChildren() {
+      return this.children.filter((c) => c.show)
    }
 
    @computed.struct
@@ -483,9 +499,17 @@ export class CardRecord extends Record<CardRecord> {
       }
    }
 
-   toggleRelated(val?: boolean) {
+   toggleRelatedCollapsed(val?: boolean) {
+      const newVal = val === undefined ? !this.local.relatedCollapsed : val
+
+      if (newVal === false) {
+         cardStore.dirty.add(this)
+      } else {
+         cardStore.dirty.delete(this)
+      }
+
       this.updateLocal({
-         relatedCollapsed: val === undefined ? !this.local.relatedCollapsed : val,
+         relatedCollapsed: newVal,
       })
    }
 
@@ -706,15 +730,22 @@ export class CardRecord extends Record<CardRecord> {
    get show() {
       const card = this
 
-      const cardOrDescendentSelected =
+      const cardOrDescendentSelectedOrUnrolled =
+         // is selected or has selected decendent
          card.isSelected ||
          cardStore.currentSelected?.hasAncestor(this) ||
+         //
+         // is dirty or has dirty descendent
+         // cardStore.dirty.has(this) ||
+         // Array.from(cardStore.dirty.values()).some((c) => c.hasAncestor(this)) ||
+         //
+         // is a select comment card on this card or a descendent
          cardStore.currentSelected?.paragraphParent === card ||
          cardStore.currentSelected?.paragraphParent?.hasAncestor(this)
 
       // If it belongs to the logged in user then show it
       if (this.isArchived || this.myUserData.isHidden || this.parent?.local.relatedCollapsed) {
-         return !!cardOrDescendentSelected
+         return !!cardOrDescendentSelectedOrUnrolled
       }
 
       if (this.isMine) return true
@@ -810,14 +841,14 @@ export class CardRecord extends Record<CardRecord> {
    }
 
    focusUp() {
-      if (this.parent?.local.relatedCollapsed) this.parent.toggleRelated(false)
+      if (this.parent?.local.relatedCollapsed) this.parent.toggleRelatedCollapsed(false)
 
       const peer = this.previousPeer() || this.newPeer({ order: -1 })
       peer.focusCursor().centerOnScreen()
    }
 
    focusDown() {
-      if (this.parent?.local.relatedCollapsed) this.parent.toggleRelated(false)
+      if (this.parent?.local.relatedCollapsed) this.parent.toggleRelatedCollapsed(false)
 
       const peer = this.nextPeer() || this.newPeer()
       peer.focusCursor().centerOnScreen()
@@ -855,12 +886,108 @@ export class CardRecord extends Record<CardRecord> {
       cardStore.setHotseat(this)
       this.centerOnScreen()
    }
+
+   collapseAllText() {
+      allDescendent(this.children, (c) => c.toggleTextCollapsed(true))
+   }
+
+   uncollapseAllText() {
+      allDescendent(this.children, (c) => c.toggleTextCollapsed(false))
+   }
+
+   // ===== THEY SEE ME ROLLIN =====
+
+   isRolledUp() {
+      return (
+         this.local.relatedCollapsed && this.children.filter((c) => !c.isArchived && !this.myUserData.isHidden).length
+      )
+   }
+
+   updateRollOutlines(hovered: boolean) {
+      this.toRoll().forEach((c) => {
+         c.children.forEach((ch) => ch.updateLocal({ rollControlHovered: hovered }))
+      })
+   }
+
+   updateRollAllOutlines(hovered: boolean) {
+      this.toRollAll().forEach((c) => {
+         if (c === this) return
+         c.updateLocal({ rollControlHovered: hovered })
+      })
+   }
+
+   // All cards that would be rolled if we rolled one layer
+   toRoll() {
+      const layers = []
+
+      let children = [this as CardRecord]
+      while (children.length) {
+         layers.push(children)
+         children = children.flatMap((c) => c.children)
+      }
+
+      return layers.reverse().find((l) => l.some((c) => c.isUnrolled())) || []
+   }
+
+   roll() {
+      this.toRoll().forEach((c) => c.toggleRelatedCollapsed(true))
+   }
+
+   // All cards that would be rolled if we rolled all
+   toRollAll() {
+      let allChildren: CardRecord[] = [this]
+      let children = [this as CardRecord]
+
+      while (children.length) {
+         children = children.flatMap((c) => c.children)
+         allChildren = [...allChildren, ...children]
+      }
+      return allChildren
+   }
+
+   rollAll() {
+      this.toRollAll().forEach((c) => c.toggleRelatedCollapsed(true))
+   }
+
+   // ===== THEY SEE ME UN-ROLLIN =====
+
+   isUnrolled() {
+      return (
+         !this.local.relatedCollapsed && this.children.filter((c) => !c.isArchived && !this.myUserData.isHidden).length
+      )
+   }
+
+   unroll() {
+      // find the first descendent card with children that are rolled up
+      let rolledUp
+      let children = [this as CardRecord]
+      while (children.length && !rolledUp) {
+         rolledUp = children.find((c) => c.local.relatedCollapsed && c.children.length)
+         if (!rolledUp) {
+            children = children.flatMap((c) => c.children)
+         }
+      }
+
+      if (!rolledUp) return
+
+      children.forEach((c) => c.toggleRelatedCollapsed(false))
+   }
+
+   unrollAll() {
+      let children = [this as CardRecord]
+      while (children.length) {
+         children.forEach((c) => c.toggleRelatedCollapsed(false))
+         children = children.flatMap((c) => c.children)
+      }
+   }
 }
 
 class CardStore extends Store<typeof CardRecord, CardRecord> {
    @observable currentSelected: CardRecord | null = null
 
    @observable currentHotseat: CardRecord | null = null
+
+   @observable dirty: Set<CardRecord> = new Set()
 
    loadCards(boardId: string) {
       const q = query(this.collection, where("boardId", "==", boardId))

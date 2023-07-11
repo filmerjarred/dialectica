@@ -129,6 +129,7 @@ export const Board = observer(function Board({ board }: { board: BoardRecord }) 
 
    return (
       <DndProvider backend={HTML5Backend}>
+         {/* holds everything below header and between sidebars */}
          <div className="board-wrapper">
             {}
             {user.uiShowOwnerExplorer ? (
@@ -150,29 +151,19 @@ export const Board = observer(function Board({ board }: { board: BoardRecord }) 
 
                {}
                {/* Stretches wide past window and handles the pan and zoom */}
-               <div className="infinite-canvas" ref={boardCanvasRef}>
-                  {}
-                  {/*  Holds the cards and grows with them */}
-                  {/* DISCUSSION BOARD */}
-                  <ArcherContainer strokeColor="grey" strokeWidth={1} endMarker={false} className="archer-container">
-                     <div className="board mb-[80px] items-center" ref={messageBoardRef} onClick={onDoubleClick}>
-                        <MessageCircle />
-                        <div className="cards-wrapper py-10">
-                           <Cards
-                              cards={board.discussionRoots}
-                              side={Side.LEFT}
-                              type={CardLocationType.DISCUSSION}
-                           ></Cards>
-                           {!board.discussionRoots.length ? (
-                              <div className="centerize text-slate-500 pr-[135px] z-[-1]">Meta discussion</div>
-                           ) : null}
-                        </div>
-                     </div>
-                  </ArcherContainer>
-
+               <div
+                  className="infinite-canvas"
+                  ref={boardCanvasRef}
+                  onClick={(e) => {
+                     // @ts-ignore
+                     if (!e.target.matches("div[is_card], div[is_card] *")) {
+                        cardStore.setSelected(null)
+                     }
+                  }}
+               >
                   {/* CLAIM AND POSITIONS BOARD */}
                   <ArcherContainer
-                     strokeColor="grey"
+                     strokeColor="black"
                      strokeWidth={0.5}
                      endMarker={false}
                      className="archer-container"
@@ -202,7 +193,7 @@ export const Board = observer(function Board({ board }: { board: BoardRecord }) 
                            ) : null}
 
                            {/* LEFT & RIGHT VIEWS */}
-                           <div ref={ownerCircleRef} className="flex flex-1 items-center py-10">
+                           <div ref={ownerCircleRef} className="left-and-right">
                               <UserCircle user={board.leftUser} side={Side.LEFT} />
 
                               <div className="cards-wrapper">

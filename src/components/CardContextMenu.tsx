@@ -79,6 +79,7 @@ export const CardContextMenu = observer(function CardContextMenu() {
             // if (!visible) debugger
          }}
       >
+         {<Command id="CARD_HOTSEAT" card={card}></Command>}
          {/* {card.isMine ? <Command id="CARD_HOTSEAT" card={card}></Command> : null} */}
 
          {/* <Command id="CARD_TODO" card={card}></Command> */}

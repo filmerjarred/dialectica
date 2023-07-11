@@ -168,8 +168,8 @@ export const App = observer(function App() {
 
    return (
       <div className={`app ${cardStore.isHotseat ? "hotseat-mode" : ""}`}>
-         <div className="header-wrapper">
-            <div className="header text-sm">
+         <div className="app-header">
+            <div className="header-content text-sm">
                <Link to={"/settings"}>
                   <img className="user-image-circle" src={user.photoURL!}></img>
                </Link>
@@ -295,7 +295,8 @@ export const App = observer(function App() {
          {uiStore.showFeedback ? <FeedBack /> : null}
          {/* {uiStore.showLog ? <LocalLog /> : null} */}
 
-         <div className="flex flex-1" style={{ height: "calc(100% - 57px)" }}>
+         {/* holds everything under header */}
+         <div className="app-body" style={{ height: "calc(100% - 57px)" }}>
             {userRecord.uiShowHelp ? <Help /> : null}
             {appBody}
          </div>
