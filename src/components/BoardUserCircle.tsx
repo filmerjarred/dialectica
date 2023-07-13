@@ -46,11 +46,15 @@ export const UserCircle = observer(function UserCircle({ side, user }: { side: S
    if (userOnBoard) {
       return (
          <div className={`fade-target user-image-circle-wrapper ${side === Side.LEFT ? "pl-[40px]" : "pr-[40px]"}`}>
-            <FoldController side={side} cardOrBoard={board}>
+            {side === Side.TOP ? 
                <ArcherElement id={getUserCircleArcherId({ boardId: board.id, side })}>
                   <img className="user-image-circle" src={user.pic}></img>
                </ArcherElement>
-            </FoldController>
+             : <FoldController side={side} cardOrBoard={board}>
+               <ArcherElement id={getUserCircleArcherId({ boardId: board.id, side })}>
+                  <img className="user-image-circle" src={user.pic}></img>
+               </ArcherElement>
+            </FoldController>}
          </div>
       )
    } else if (side === Side.RIGHT) {

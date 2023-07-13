@@ -36,6 +36,7 @@ export const FoldController = observer(function Dropdown<T>({
             onClick={(e) => {
                cardOrBoard.collapseAllDescendentText(side)
             }}
+            title="Fold up text on all cards downstream of here"
             className={`control-circle control-circle-large top-row pb-[1px]`}
          >
             <i className="fal fa-chevron-double-up"></i>
