@@ -66,7 +66,7 @@ export const Explorer = observer(function Explorer({ side }: { side: Side }) {
    }
 
    return (
-      <div className="explorer-panel flex flex-col overflow-hidden">
+      <div className="fade-target explorer-panel flex flex-col overflow-hidden">
          {/* TODO */}
          <div className="flex flex-col overflow-hidden mb-2" style={{ minHeight: todosMinHeight }}>
             <div className="flex bg-slate-200 p-1 flex items-center">

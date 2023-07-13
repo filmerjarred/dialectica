@@ -190,7 +190,7 @@ function CardWithChildrenComponent({ card, side, type }: { card: CardRecord; sid
             ) : null}
 
             {/* card and children */}
-            <div className={`card-with-child-cards side-${card.side.toLowerCase()}`}>
+            <div className={`card-with-child-cards side-${side.toLowerCase()}`}>
                {/* card */}
                {left ? cardEle : null}
 

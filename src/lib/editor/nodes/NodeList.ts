@@ -6,7 +6,7 @@
  *
  */
 
-import { Klass, LexicalNode, ParagraphNode } from "lexical"
+import { Klass, LexicalNode, ParagraphNode, TextNode } from "lexical"
 
 import { CodeHighlightNode, CodeNode } from "@lexical/code"
 import { HashtagNode } from "@lexical/hashtag"
@@ -37,6 +37,7 @@ import { WikiLinkNode } from "../plugins/WikiLinksPlugin"
 import { QuestionNode } from "../plugins/QuestionPlugin"
 import { DialecticaParagraphNode } from "../plugins/DialecticaParagraphPlugin"
 import { uuidv4 } from "@firebase/util"
+import { DialecticaSentenceNode } from "../plugins/DialecticaSentencePlugin"
 
 type X = {
    replace: Klass<LexicalNode>
@@ -68,6 +69,7 @@ export function getNodeList(theme: string) {
       ListItemNode,
 
       DialecticaParagraphNode,
+      DialecticaSentenceNode,
 
       HashtagNode,
       CodeHighlightNode,
@@ -97,6 +99,13 @@ export function getNodeList(theme: string) {
          replace: ParagraphNode,
          with: (node: ParagraphNode) => {
             return new DialecticaParagraphNode(uuidv4())
+         },
+      })
+
+      nodeList.push({
+         replace: TextNode,
+         with: (node: TextNode) => {
+            return new DialecticaSentenceNode(node.__text, uuidv4())
          },
       })
    }

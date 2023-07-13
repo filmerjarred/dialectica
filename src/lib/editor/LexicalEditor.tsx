@@ -40,6 +40,7 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { SharedAutocompleteContext } from "./context/SharedAutocompleteContext"
 import QuestionsPlugin from "./plugins/QuestionPlugin"
 import DialecticaParagraphPlugin from "./plugins/DialecticaParagraphPlugin"
+import DialecticaSentencePlugin from "./plugins/DialecticaSentencePlugin"
 
 export interface LexicalEditorProps {
    placeholder?: string
@@ -130,6 +131,8 @@ export default function Editor({
                   onClick={onClick}
                   onMouseDown={onMouseDown}
                >
+                  <div className="title-border"></div>
+
                   {isMaxLength && <MaxLengthPlugin maxLength={30} />}
                   <DragDropPaste />
 
@@ -138,6 +141,7 @@ export default function Editor({
                   <WikiLinksPlugin />
                   <QuestionsPlugin />
 
+                  <DialecticaSentencePlugin />
                   <DialecticaParagraphPlugin />
 
                   {/* <KeywordsPlugin /> */}

@@ -10,7 +10,7 @@ import { saveToLocalLog } from "../lib/localLog"
 import { runInAction, trace } from "mobx"
 import { TodoRecord, todoStore } from "../lib/todo.data"
 import { lexicalToText } from "../lib/lexicalToText"
-import { RelatedCards } from "./RelatedCards"
+import { ParagraphGutters } from "./ParagraphGutters"
 import { InitialConfigType } from "@lexical/react/LexicalComposer"
 
 const CardEditor = observer(CardEditorComponent)
@@ -115,7 +115,7 @@ function CardEditorComponent({ card }: { card: CardRecord }) {
             onTextFocus={onTextFocus}
             onKeyDown={onKeyDown}
          />
-         <RelatedCards card={card} />
+         <ParagraphGutters card={card} />
       </div>
    )
 }

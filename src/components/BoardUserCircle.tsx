@@ -4,6 +4,7 @@ import { BoardRecord, boardStore } from "../lib/board.data"
 import { cardStore, CardLocationType, Side } from "../lib/card.data"
 import { getUserCircleArcherId } from "../lib/useArcherRelations"
 import { UserRecord, userStore } from "../lib/user.data"
+import { FoldController } from "./FoldController"
 
 export const MessageCircle = observer(function MessageCircle() {
    const board = boardStore.getCurrentBoard()
@@ -24,9 +25,12 @@ export const MessageCircle = observer(function MessageCircle() {
    }
 
    return (
-      <div className="user-image-circle-wrapper">
+      <div className={`user-image-circle-wrapper`}>
          <ArcherElement id={getUserCircleArcherId({ boardId: board.id, side: Side.LEFT })}>
-            <div onClick={addMessage} className="user-image-circle text-xl flex items-center justify-center">
+            <div
+               onClick={addMessage}
+               className="fade-target user-image-circle text-xl flex items-center justify-center"
+            >
                📫
             </div>
          </ArcherElement>
@@ -41,10 +45,12 @@ export const UserCircle = observer(function UserCircle({ side, user }: { side: S
 
    if (userOnBoard) {
       return (
-         <div className="user-image-circle-wrapper">
-            <ArcherElement id={getUserCircleArcherId({ boardId: board.id, side })}>
-               <img className="user-image-circle" src={user.pic}></img>
-            </ArcherElement>
+         <div className={`fade-target user-image-circle-wrapper ${side === Side.LEFT ? "pl-[40px]" : "pr-[40px]"}`}>
+            <FoldController side={side} cardOrBoard={board}>
+               <ArcherElement id={getUserCircleArcherId({ boardId: board.id, side })}>
+                  <img className="user-image-circle" src={user.pic}></img>
+               </ArcherElement>
+            </FoldController>
          </div>
       )
    } else if (side === Side.RIGHT) {

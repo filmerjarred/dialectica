@@ -26,6 +26,12 @@ async function updateParagraph(t: string): Promise<string | null> {
       t = t.replaceAll(`"type":"paragraph"`, x)
    }
 
+   if (t.includes(`"type":"text"`)) {
+      const x = `"type":"dialectica-sentence", "config":{"id":"${uuidv4()}"}`
+
+      t = t.replaceAll(`"type":"text"`, x)
+   }
+
    return removeNewlines(t)
 }
 
@@ -383,6 +389,36 @@ export class BoardRecord extends Record<BoardRecord> {
          }
       })
    }
+
+   sideCards(side: Side) {
+      return side === Side.LEFT ? this.leftRoots : this.rightRoots
+   }
+
+   collapseAllDescendentText(side: Side) {
+      this.sideCards(side).forEach((c) => c.toggleTextCollapsed(true))
+      this.sideCards(side).forEach((c) => c.collapseAllDescendentText())
+   }
+
+   updateRollOutlines(val: boolean) {}
+   updateRollAllOutlines(val: boolean) {}
+
+   rollAll(side: Side) {
+      this.sideCards(side).forEach((c) => c.rollAll())
+   }
+   roll(side: Side) {
+      this.sideCards(side).forEach((c) => c.roll())
+   }
+
+   unroll(side: Side) {
+      this.sideCards(side).forEach((c) => c.unroll())
+   }
+   unrollAll(side: Side) {
+      this.sideCards(side).forEach((c) => c.unrollAll())
+   }
+   uncollapseAllDescendentText(side: Side) {
+      this.sideCards(side).forEach((c) => c.toggleTextCollapsed(false))
+      this.sideCards(side).forEach((c) => c.uncollapseAllDescendentText())
+   }
 }
 
 class BoardStore extends Store<typeof BoardRecord, BoardRecord> {
@@ -397,6 +433,8 @@ class BoardStore extends Store<typeof BoardRecord, BoardRecord> {
          if (board) {
             cardStore.loadCards(board.id)
             todoStore.loadTodos(board.id)
+
+            cardStore.setSelected(null)
 
             const promises = [cardStore.loadingResolvable?.promise, todoStore.loadingResolvable?.promise]
 
@@ -417,17 +455,17 @@ class BoardStore extends Store<typeof BoardRecord, BoardRecord> {
 
                   // TODO (remove this eventually)
                   Array.from(cardStore.records.values()).forEach(async (card) => {
-                     const oldTextUpdate = await updateParagraph(card.oldText)
-                     if (oldTextUpdate) {
-                        card.update({ oldText: oldTextUpdate })
-                     }
+                     // const oldTextUpdate = await updateParagraph(card.oldText)
+                     // if (oldTextUpdate) {
+                     //    card.update({ oldText: oldTextUpdate })
+                     // }
 
-                     if (card.updatedText) {
-                        const updatedTextUpdate = await updateParagraph(card.updatedText)
-                        if (updatedTextUpdate) {
-                           card.update({ updatedText: updatedTextUpdate })
-                        }
-                     }
+                     // if (card.updatedText) {
+                     //    const updatedTextUpdate = await updateParagraph(card.updatedText)
+                     //    if (updatedTextUpdate) {
+                     //       card.update({ updatedText: updatedTextUpdate })
+                     //    }
+                     // }
 
                      if (card.plainText === "" && card.cardLocationType !== CardLocationType.PARAGRAPH) {
                         card.toggleTextCollapsed(true)

@@ -18,7 +18,7 @@ import {
 import { uuidv4 } from "@firebase/util"
 import { CardLocationType, CardRecord, cardStore, LexicalParagraphData } from "../../../card.data"
 import { IReactionDisposer, makeObservable, reaction, runInAction } from "mobx"
-import _ from "lodash"
+import _, { split } from "lodash"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
 import { useEffect, useRef } from "react"
 import { boardStore } from "../../../board.data"
@@ -161,7 +161,7 @@ export class DialecticaParagraphNode extends ParagraphNode {
             this.paragraphData.id = uuidv4()
          }
 
-         this.registerRelatedCardHeightListener(editor)
+         this.registerParagraphDataObserver(editor)
 
          // add node to card "paragraph data" array
          const card = this.card as CardRecord
@@ -177,12 +177,26 @@ export class DialecticaParagraphNode extends ParagraphNode {
       return dom
    }
 
-   registerRelatedCardHeightListener(editor: LexicalEditor) {
+   registerParagraphDataObserver(editor: LexicalEditor) {
       // if (!this.deregisterFn) {
       // this.deregisterFn =
       // todo: figure out how to handle deregister (get's weird once you hide and show text)
 
       // set the margin whenever the  "relatedCardsHeight" changes
+      reaction(
+         () => this.paragraphData.splitSentences,
+         (splitSentences) => {
+            const dom = editor.getElementByKey(this.getKey())
+            if (!dom) return
+
+            if (splitSentences && !dom.className.includes("split-sentences")) {
+               dom.className += " split-sentences"
+            } else if (!splitSentences && dom.className.includes("split-sentences")) {
+               dom.className = dom.className.replaceAll("split-sentences", "")
+            }
+         }
+      )
+
       reaction(
          () => this.paragraphData.relatedCardsHeight,
          (relatedCardsHeight) => {
@@ -327,20 +341,7 @@ export default function DialecticaParagraphPlugin() {
                   n.onChange(editor)
                }
             })
-         }),
-
-         editor.registerCommand(
-            KEY_DOWN_COMMAND,
-            (e: KeyboardEvent) => {
-               if (e.key === "`") {
-                  e.preventDefault()
-                  $insertDialecticaParagraphNode(editor._config.theme.card)
-               }
-
-               return false
-            },
-            COMMAND_PRIORITY_HIGH
-         )
+         })
       )
    }, [editor])
 

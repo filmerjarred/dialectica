@@ -39,6 +39,7 @@ import {
 import { TagLine } from "./CardIntentionType"
 import { Tags } from "./Tags"
 import { QuickTagBar } from "./QuickTagBar"
+import { FoldController } from "./FoldController"
 
 interface CardProps {
    card: CardRecord
@@ -177,12 +178,6 @@ function CardComponent({
       gutterItem,
    })
 
-   function onBlur() {
-      if (cardStore.currentSelected === card) {
-         // cardStore.setSelected(null)
-      }
-   }
-
    // === REGISTER HOOKS END ====
 
    const updateTitle = (e: any) => card.isMine && !gutterItem && card.update({ updatedTitle: e.target.value })
@@ -190,6 +185,7 @@ function CardComponent({
    let className = `relative card`
 
    if (card.local.textCollapsed) className += " collapsed"
+   if (!card.local.textCollapsed) className += " text-expanded"
    if (card.isSelected) className += " focused"
    if (card.isMine) className += " card-mine"
    if (!card.isMine) className += " card-partners"
@@ -203,6 +199,7 @@ function CardComponent({
    if (card.local.rollControlHovered) className += " parent-roll-hovered"
 
    let cardContentClassName = "card-content"
+   if (!card.isMine && card.local.selectedSentenceId) cardContentClassName += " card-sentence-selected"
    if (card.cardLocationType === CardLocationType.PARAGRAPH) cardContentClassName += " paragraph-card min-w-[590px]"
    if (card.cardLocationType !== CardLocationType.PARAGRAPH) cardContentClassName += " board-card min-w-[590px]"
    if (
@@ -217,9 +214,18 @@ function CardComponent({
    return (
       <div
          className={`card-and-gutter-wrapper ${inHotseat ? "hotseat" : ""}`}
+         is_card="true" // for use in panzoom
          // @ts-ignore
          ref={cardRef}
-         tabIndex={-1}
+         tabIndex={0}
+         onBlur={(e) => {
+            const target = e.relatedTarget as HTMLElement
+            if (!target) return cardStore.setSelected(null)
+
+            if (!target.matches("div[is_card], div[is_card] *")) {
+               cardStore.setSelected(null)
+            }
+         }}
          onClick={(e) => {
             console.log(card)
             if (e.altKey || e.ctrlKey) {
@@ -236,7 +242,6 @@ function CardComponent({
                <div
                   tabIndex={-1}
                   id={card.id}
-                  onBlur={onBlur}
                   onContextMenu={(e) => {
                      if (!e.altKey && !e.ctrlKey) {
                         uiStore.setContextMenuCard(card)
@@ -249,7 +254,7 @@ function CardComponent({
                   }}
                   ref={dropRef}
                   // @ts-ignores
-                  is_card="true" // for use in panzoom
+
                   className={className}
                >
                   <div className={`${cardContentClassName} flex flex-col flex-1 `}>
@@ -416,114 +421,175 @@ function CardComponent({
                            })()}
                         </div>
 
-                        {/* controls of assorted dispositions */}
+                        {card.children.length && !isTop && !overhead && !inHotseat && !gutterItem ? (
+                           <div className={`fade-target children-controls-${side.toLowerCase()}`}>
+                              <FoldController side={side} cardOrBoard={card}>
+                                 <ArcherElement
+                                    id={getRelatedCardsCollapseCircleArcherId({ card, side: isTop ? Side.TOP : side })}
+                                 >
+                                    <div
+                                       className={`control-circle control-circle-small collapsed-children-indicator-${side.toLowerCase()}`}
+                                       title="Show / hide child cards"
+                                       onClick={(e) => {
+                                          if (e.ctrlKey || e.altKey) {
+                                             const val = !card.local.relatedCollapsed
+                                             allDescendentAndRoot(card, (c) => c.toggleRelatedCollapsed(val))
+                                          } else {
+                                             card.toggleRelatedCollapsed()
+                                          }
+                                          e.stopPropagation()
+                                       }}
+                                    >
+                                       {card.local.relatedCollapsed ? <span>...</span> : null}
+                                    </div>
+                                 </ArcherElement>
+                              </FoldController>
+                           </div>
+                        ) : null}
+
+                        {/* {card.children.length && !isTop && !overhead && !inHotseat && !gutterItem ? (
+                           <div className={`card-controls children-controls-${side.toLowerCase()}`}>
+                              <div
+                                 onClick={(e) => {
+                                    card.collapseAllDescendentText()
+                                 }}
+                                 className={`control-circle control-circle-large mb-[-8px]`}
+                              >
+                                 <i className="fal fa-chevron-double-up"></i>
+                              </div>
+
+                              <div className="flex items-center gap-[4px]">
+                                 <div className="flex flex-col gap-[4px]">
+                                    <div
+                                       onMouseOver={() => card.updateRollAllOutlines(true)}
+                                       onMouseLeave={() => card.updateRollAllOutlines(false)}
+                                       title="Roll up all cards downstream of this card"
+                                       onClick={(e) => {
+                                          card.rollAll()
+                                          cardStore.setSelected(null)
+                                       }}
+                                       className={`control-circle control-circle-large`}
+                                    >
+                                       <i className="fal fa-chevron-double-left"></i>
+                                    </div>
+
+                                    <div
+                                       className={`control-circle control-circle-large pr-[2px]`}
+                                       title="Roll up the outermost edge of the tree one layer"
+                                       onClick={(e) => {
+                                          card.roll()
+                                          cardStore.setSelected(null)
+                                          card.updateRollOutlines(true)
+                                       }}
+                                       onMouseOver={() => card.updateRollOutlines(true)}
+                                       onMouseLeave={() => card.updateRollOutlines(false)}
+                                    >
+                                       <i className="fal fa-chevron-left"></i>
+                                    </div>
+                                 </div>
+
+                                 <ArcherElement
+                                    id={getRelatedCardsCollapseCircleArcherId({ card, side: isTop ? Side.TOP : side })}
+                                 >
+                                    <div
+                                       className={`control-circle control-circle-small collapsed-children-indicator-${side.toLowerCase()}`}
+                                       title="Show / hide child cards"
+                                       onClick={(e) => {
+                                          if (e.ctrlKey || e.altKey) {
+                                             const val = !card.local.relatedCollapsed
+                                             allDescendentAndRoot(card, (c) => c.toggleRelatedCollapsed(val))
+                                          } else {
+                                             card.toggleRelatedCollapsed()
+                                          }
+                                          e.stopPropagation()
+                                       }}
+                                    >
+                                       {card.local.relatedCollapsed ? <span>...</span> : null}
+                                    </div>
+                                 </ArcherElement>
+
+                                 <div className="flex flex-col gap-[4px]">
+                                    <div
+                                       className={`control-circle control-circle-large pl-[2px]`}
+                                       title="Unroll all cards downstream of this card"
+                                       onClick={(e) => card.unrollAll()}
+                                    >
+                                       <i className="fal fa-chevron-double-right"></i>
+                                    </div>
+
+                                    <div
+                                       title="Unroll one layer at the outermost edge of the tree"
+                                       className={`control-circle control-circle-large pl-[1px]`}
+                                       onClick={(e) => card.unroll()}
+                                    >
+                                       <i className="fal fa-chevron-right"></i>
+                                    </div>
+                                 </div>
+                              </div>
+
+                              <div
+                                 onClick={(e) => {
+                                    card.uncollapseAllDescendentText()
+                                 }}
+                                 title="Show the text for all cards downstream of this card"
+                                 className={`control-circle control-circle-large mt-[-8px]`}
+                              >
+                                 <i className="fal fa-chevron-double-down"></i>
+                              </div>
+                           </div>
+                        ) : null} */}
+                     </div>
+
+                     {/* text collapse control */}
+                     {card.cardLocationType !== CardLocationType.PARAGRAPH ? (
                         <div className={"card-controls text-controls"}>
                            <div
                               onClick={(e) => {
                                  card.toggleTextCollapsed()
                               }}
-                              className={`control-circle control-circle-small pb-[1px] text-[9px]`}
-                              title="Show / hide child cards"
+                              className={`text-collapse-circle`}
+                              title="Show / hide text"
                            >
                               {card.local.textCollapsed ? (
-                                 <i className="fal fa-chevron-up"></i>
-                              ) : (
                                  <i className="fal fa-chevron-down"></i>
+                              ) : (
+                                 <i className="fal fa-chevron-up"></i>
                               )}
                            </div>
 
-                           <div
-                              onClick={(e) => {
-                                 card.collapseAllText()
-                              }}
-                              className={`control-circle control-circle-large`}
-                              title="Show / hide child cards"
-                           >
-                              <i className="fal fa-chevron-double-up"></i>
-                           </div>
-
-                           <div
-                              onClick={(e) => {
-                                 card.uncollapseAllText()
-                              }}
-                              className={`control-circle control-circle-large`}
-                              title="Show / hide child cards"
-                           >
-                              <i className="fal fa-chevron-double-down"></i>
-                           </div>
-                        </div>
-
-                        {card.children.length && !isTop && !overhead && !inHotseat && !gutterItem ? (
-                           <div className={`card-controls children-controls-${side.toLowerCase()}`}>
+                           <div className={`flex gap-[15px] mt-[-4px] ${card.peers.length ? "" : "opacity-0"}`}>
                               <div
-                                 title="Unroll one layer at the outermost edge of the tree"
-                                 className={`control-circle control-circle-large pl-[1px]`}
-                                 onClick={(e) => card.unroll()}
-                              >
-                                 <i className="fal fa-chevron-right"></i>
-                              </div>
-
-                              <div
-                                 className={`control-circle control-circle-large pl-[2px]`}
-                                 title="Unroll all cards downstream of this card"
-                                 onClick={(e) => card.unrollAll()}
-                              >
-                                 <i className="fal fa-chevron-double-right"></i>
-                              </div>
-
-                              <ArcherElement
-                                 id={getRelatedCardsCollapseCircleArcherId({ card, side: isTop ? Side.TOP : side })}
-                              >
-                                 <div
-                                    className={`control-circle control-circle-small collapsed-children-indicator-${side.toLowerCase()}`}
-                                    title="Show / hide child cards"
-                                    onClick={(e) => {
-                                       if (e.ctrlKey || e.altKey) {
-                                          const val = !card.local.relatedCollapsed
-                                          allDescendentAndRoot(card, (c) => c.toggleRelatedCollapsed(val))
-                                       } else {
-                                          card.toggleRelatedCollapsed()
-                                       }
-                                       e.stopPropagation()
-                                    }}
-                                 >
-                                    {card.local.relatedCollapsed ? <span>...</span> : null}
-                                 </div>
-                              </ArcherElement>
-
-                              <div
-                                 onMouseOver={() => card.updateRollAllOutlines(true)}
-                                 onMouseLeave={() => card.updateRollAllOutlines(false)}
-                                 title="Roll up all cards downstream of this card"
                                  onClick={(e) => {
-                                    card.rollAll()
-                                    cardStore.setSelected(null)
+                                    card.uncollapsePeerText()
                                  }}
+                                 title="Show the text for all cards in this row"
                                  className={`control-circle control-circle-large`}
                               >
-                                 <i className="fal fa-chevron-double-left"></i>
+                                 <i className="fal fa-chevron-double-down"></i>
                               </div>
 
                               <div
-                                 className={`control-circle control-circle-large pr-[2px]`}
-                                 title="Roll up the outermost edge of the tree one layer"
                                  onClick={(e) => {
-                                    card.roll()
-                                    cardStore.setSelected(null)
-                                    card.updateRollOutlines(true)
+                                    card.collapsePeerText()
                                  }}
-                                 onMouseOver={() => card.updateRollOutlines(true)}
-                                 onMouseLeave={() => card.updateRollOutlines(false)}
+                                 title="Hide the text for all cards in this row"
+                                 className={`control-circle control-circle-large`}
                               >
-                                 <i className="fal fa-chevron-left"></i>
+                                 <i className="fal fa-chevron-double-up"></i>
                               </div>
                            </div>
-                        ) : null}
-                     </div>
+                        </div>
+                     ) : null}
 
-                     <div className="card-bottom-bar">
-                        <QuickTagBar card={card}></QuickTagBar>
-                     </div>
+                     {card.cardLocationType === CardLocationType.PARAGRAPH ? (
+                        <div className="card-bottom-bar">
+                           <QuickTagBar card={card}></QuickTagBar>
+                        </div>
+                     ) : (
+                        <div className="card-above-top-bar">
+                           <QuickTagBar card={card}></QuickTagBar>
+                        </div>
+                     )}
                   </div>
                </div>
             </ArcherElement>

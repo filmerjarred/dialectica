@@ -21,19 +21,14 @@ function getDepth(cards: CardRecord[], i: number = 1): number {
    return max
 }
 
-export const RelatedCards = observer(function RelatedCards({ card }: { card: CardRecord }) {
+export const ParagraphGutters = observer(function RelatedCards({ card }: { card: CardRecord }) {
    if (!card.lexicalParagraphsWithCards.length) return null
 
    const depth = getDepth(card.relatedParagraphCards)
    return (
-      <div className="relative flex-1" style={{ minWidth: 635 * depth }}>
+      <div className="relative flex-1" style={{ minWidth: 675 * depth }}>
          {_.map(card.lexicalParagraphsWithCards, (p) => (
-            <RelatedParagraphCards
-               key={card.id + p.paragraph.id}
-               parentCardId={card.id}
-               cards={p.cards}
-               paragraph={p.paragraph}
-            />
+            <ParagraphGutter key={card.id + p.paragraph.id} parentCard={card} cards={p.cards} paragraph={p.paragraph} />
          ))}
       </div>
    )
@@ -41,13 +36,13 @@ export const RelatedCards = observer(function RelatedCards({ card }: { card: Car
 
 const COMMENT_MARGIN = 16 // how much margin to ensure the comments have between one another vertically
 
-export const RelatedParagraphCards = observer(function RelatedParagraphCards({
+export const ParagraphGutter = observer(function RelatedParagraphCards({
    cards,
-   parentCardId,
+   parentCard,
    paragraph,
 }: {
    cards: CardRecord[]
-   parentCardId: string
+   parentCard: CardRecord
    paragraph: LexicalParagraphData
 }) {
    const ref = useRef<HTMLDivElement>(null)
@@ -86,14 +81,34 @@ export const RelatedParagraphCards = observer(function RelatedParagraphCards({
             minHeight: paragraph.paragraphHeight + "px",
          }}
       >
+         {!parentCard.isMine ? (
+            <div
+               className={`paragraphs-to-lines do-not-blur-sentence ${
+                  paragraph.splitSentences ? "text-sky-500" : "opacity-20"
+               }`}
+               tabIndex={0}
+               onClick={() => {
+                  runInAction(() => {
+                     paragraph.splitSentences = !paragraph.splitSentences
+                  })
+               }}
+            >
+               <i className="fas fa-line-height"></i>
+            </div>
+         ) : null}
+
          <div className="centerize-vertical">
             <ArcherElement
-               id={getParagraphCardGutterCenterLeft({ paragraphId: paragraph.id, paragraphParentCardId: parentCardId })}
+               id={getParagraphCardGutterCenterLeft({
+                  paragraphId: paragraph.id,
+                  paragraphParentCardId: parentCard.id,
+               })}
             >
                <div></div>
             </ArcherElement>
          </div>
 
+         {/* related cards */}
          <div>
             <Cards type={CardLocationType.PARAGRAPH} cards={cards} side={Side.LEFT}></Cards>
          </div>

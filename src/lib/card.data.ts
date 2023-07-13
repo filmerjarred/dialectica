@@ -69,6 +69,18 @@ export class LexicalParagraphData {
 
    @observable relatedCardsHeight?: number
 
+   @observable splitSentences: boolean = false
+
+   constructor(id: string, editorId: string) {
+      this.id = id
+      this.editorId = editorId
+   }
+}
+
+export class LexicalSentenceData {
+   id: string
+   editorId?: string
+
    constructor(id: string, editorId: string) {
       this.id = id
       this.editorId = editorId
@@ -143,6 +155,8 @@ export class CardRecord extends Record<CardRecord> {
       paragraphY?: number
       cardHeight?: number
 
+      selectedSentenceId: string | null
+
       rollControlHovered: boolean
 
       lexicalParagraphs: LexicalParagraphData[]
@@ -197,6 +211,8 @@ export class CardRecord extends Record<CardRecord> {
       squiggleCode: "normal(5,2)",
 
       shouldPanTo: false,
+
+      selectedSentenceId: null,
 
       tagLine: "",
 
@@ -318,8 +334,7 @@ export class CardRecord extends Record<CardRecord> {
          if (p.editorId !== this.localNonObserved.lexicalEditor?._config.theme.id) return []
 
          const cards = relatedParagraphCards.filter((c) => c.show && c.paragraphId === p.id)
-         if (!cards.length) return []
-         else return [{ paragraph: p, cards }]
+         return [{ paragraph: p, cards }]
       })
    }
 
@@ -887,12 +902,20 @@ export class CardRecord extends Record<CardRecord> {
       this.centerOnScreen()
    }
 
-   collapseAllText() {
+   collapseAllDescendentText() {
       allDescendent(this.children, (c) => c.toggleTextCollapsed(true))
    }
 
-   uncollapseAllText() {
-      allDescendent(this.children, (c) => c.toggleTextCollapsed(false))
+   uncollapseAllDescendentText() {
+      allDescendent(this.children, (c) => (c.show ? c.toggleTextCollapsed(false) : null))
+   }
+
+   collapsePeerText() {
+      this.peersAndMe.forEach((c) => c.toggleTextCollapsed(true))
+   }
+
+   uncollapsePeerText() {
+      this.peersAndMe.forEach((c) => c.toggleTextCollapsed(false))
    }
 
    // ===== THEY SEE ME ROLLIN =====

@@ -165,11 +165,13 @@ input {
          3px 6px 6px rgba(0, 0, 0, .1);
    border: 1px solid rgba(0, 0, 0, 0.3);
 
+   padding: 80px 0;
+
    .user-image-circle-wrapper {
-      padding: 40px;
+      // padding: 0 40px;
       display: flex;
       align-items: center;
-      flex:1;
+      // flex:1;
    }
 
    .synthesis-cards {
@@ -260,16 +262,15 @@ input {
 }
 
 .side-left {
-   margin-left: 40px
+   margin-left: 60px
 }
 .side-right {
-   margin-right: 40px
+   margin-right: 60px
 }
 
 .card-column {
    display:flex;
    position:relative;
-   flex:1;
    align-items: center;
 }
 
@@ -731,7 +732,11 @@ button:hover:enabled {
    }
 }
 
-
+.card-is-selected {
+   .fade-target {
+      opacity: .1;
+   }
+}
 
 
 .card-user {
@@ -765,6 +770,8 @@ button:hover:enabled {
 
 
 
+
+
 .ContentEditable__root {
    position: static!important;
 
@@ -778,13 +785,56 @@ button:hover:enabled {
 
 .PlaygroundEditorTheme__paragraph {
    position: static!important;
+
+   .unfocus-sentence {
+      opacity: .2;
+   }
 }
+
+.card-partners {
+   .PlaygroundEditorTheme__paragraph {
+      .dialectica-sentence {
+         cursor:pointer;
+      }
+   }
+}
+
+.card-sentence-selected {
+   span {
+      opacity: .2;
+   }
+   
+   .sentence-selected {
+      opacity: 1;
+   }
+}
+
 
 .PlaygroundEditorTheme__paragraph, .title {
-   color:gray;
-   background-color: gray;
+   // color:gray;
+   // background-color: gray;
 }
 
+.split-sentences {
+   .dialectica-sentence {
+      display: block;
+      margin-top: 3px
+   }
+}
+
+.paragraphs-to-lines {
+   position: absolute;
+   top: -15px;
+   cursor: pointer;
+   font-size: 11px;
+   padding-top: 7px;
+   left: -24px;
+
+}
+
+.paragraphs-to-lines:hover {
+   opacity: 1;
+}
 
 .card {
    display: flex;
@@ -793,6 +843,16 @@ button:hover:enabled {
    background: white;
    outline: none;
 
+   .title-border {
+      border-top:1px solid black;
+      margin: 0 7px;
+   }
+
+   .paragraph-card {
+      .title-border {
+         display: none;
+      }
+   }
 
    .text {
       max-width: 554px;
@@ -821,6 +881,16 @@ button:hover:enabled {
    }
 
    .board-card{
+      .card-above-top-bar {
+         position: absolute;
+         display: flex;
+         align-items: center;
+         justify-content: end;
+         top: -27px;
+         width: 100%;
+         max-height: 22px;
+      }
+
       .card-top-bar{
          position: relative;
          min-height: 22px;
@@ -957,17 +1027,14 @@ button:hover:enabled {
    }
 
    .answers {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
+      // position: absolute;
+      // left: 50%;
+      // transform: translateX(-50%);
       top: 3px;
    
       display: flex;
-      align-items: center;
-      justify-content: center;
+      justify-content: end;
       gap: 8px;
-      
-
 
       .tooltiptext {
          font-size: 9px;
@@ -1058,10 +1125,8 @@ button:hover:enabled {
 }
 
 
-
-
 .control-circle {
-   // opacity: .1;
+   opacity: .1;
 }
 
 .collapsed {
@@ -1076,28 +1141,80 @@ button:hover:enabled {
 }
 
 .card-controls {
-   position: absolute;
+   z-index: 99;
    flex-direction: column;
    display: flex;
-   gap: 10px;
-   color: gray;
+   // color: gray;
    padding: 10px;
+   align-items: center;
    
    &:hover {
       .control-circle-large {
          opacity: 1;
       }
    }
+
+   .central-row {
+      display: flex;
+      align-items: center;
+      gap:4px;
+   }
+
+   .left-col, .right-col {
+      display: flex;
+      flex-direction: column;
+      gap:4px;
+   }
+
+}
+
+.cards {
+   .top-row {
+      margin-bottom: -8px;
+   }  
+   .bottom-row {
+      margin-top: -8px;
+   }
+}
+
+.user-image-circle-wrapper {
+   .card-controls {
+      .left-col, .right-col {
+         gap: 26px;
+      }
+   }
 }
 
 .text-controls {
-   right: 0;
-   top: 7px;
+   position: absolute;
+   right: 50%;
+   bottom: -10px;
+   transform: translate(50%, 50%);
    justify-content: center;
    align-items: center;
+
+   .text-collapse-circle {
+      color:#000000e0;
+      margin-bottom:2px;
+      background-color: white;
+
+      border-radius: 100px;
+      vertical-align: middle;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      justify-content: center;
+      z-index: 10;
+
+      max-width: 7px;
+      max-height: 16px;
+      min-width: 7px;
+      min-height: 16px;
+   }
 }
 
 .children-controls-left, .children-controls-right {
+   position: absolute;
    top: calc(50% - 1px);
    transform: translateY(-50%);
 
@@ -1105,10 +1222,10 @@ button:hover:enabled {
 }
 
 .children-controls-left {
-   right: -39px;
+   right: -63px;
 }
 .children-controls-right {
-   left: -22px;
+   left: -63px;
 }
 
 .control-circle {

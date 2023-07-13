@@ -154,17 +154,18 @@ export const Board = observer(function Board({ board }: { board: BoardRecord }) 
                <div
                   className="infinite-canvas"
                   ref={boardCanvasRef}
-                  onClick={(e) => {
-                     // @ts-ignore
-                     if (!e.target.matches("div[is_card], div[is_card] *")) {
-                        cardStore.setSelected(null)
-                     }
-                  }}
+                  // onClick={(e) => {
+                  //    // @ts-ignore
+                  //    if (!e.target.matches("div[is_card], div[is_card] *")) {
+                  //       cardStore.setSelected(null)
+                  //    }
+                  // }}
                >
                   {/* CLAIM AND POSITIONS BOARD */}
                   <ArcherContainer
                      strokeColor="black"
                      strokeWidth={0.5}
+                     svgContainerStyle={{ opacity: cardStore.currentSelected ? ".2" : "1" }}
                      endMarker={false}
                      className="archer-container"
                      ref={archerContainerRef}

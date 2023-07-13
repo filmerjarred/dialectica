@@ -65,6 +65,8 @@ export function useArcherRelations({
                     targetId,
                     targetAnchor,
                     sourceAnchor,
+
+                    //   style: { strokeColor: card.isSelected ? "red" : "black" },
                  },
               ]
 

@@ -167,8 +167,12 @@ export const App = observer(function App() {
    // }
 
    return (
-      <div className={`app ${cardStore.isHotseat ? "hotseat-mode" : ""}`}>
-         <div className="app-header">
+      <div
+         className={`app ${cardStore.isHotseat ? "hotseat-mode" : ""} ${
+            cardStore.currentSelected ? "card-is-selected" : ""
+         }`}
+      >
+         <div className="app-header fade-target">
             <div className="header-content text-sm">
                <Link to={"/settings"}>
                   <img className="user-image-circle" src={user.photoURL!}></img>

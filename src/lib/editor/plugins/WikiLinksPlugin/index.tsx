@@ -15,6 +15,7 @@ import {
    NodeKey,
    SerializedLexicalNode,
    Spread,
+   TextModeType,
 } from "lexical"
 import Fuse from "fuse.js"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
@@ -500,12 +501,15 @@ function useWikiLinks(editor: LexicalEditor): void {
    }, [editor])
 }
 
+let x = true
+
 export default function WikiLinksPlugin(): JSX.Element | null {
    const [editor] = useLexicalComposerContext()
    useWikiLinks(editor)
 
    useLayoutEffect(() => {
       return editor.registerUpdateListener(({ editorState, prevEditorState }) => {
+         // todo: apparently this is an anti-pattern https://lexical.dev/docs/concepts/transforms
          editor.update(() => {
             const current = $getSelection()
             const nodes = current?.getNodes()
