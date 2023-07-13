@@ -785,10 +785,6 @@ button:hover:enabled {
 
 .PlaygroundEditorTheme__paragraph {
    position: static!important;
-
-   .unfocus-sentence {
-      opacity: .2;
-   }
 }
 
 .card-partners {
@@ -801,7 +797,7 @@ button:hover:enabled {
 
 .card-sentence-selected {
    span {
-      opacity: .2;
+      opacity: .1;
    }
    
    .sentence-selected {

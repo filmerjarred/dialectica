@@ -50,7 +50,7 @@ interface CardProps {
    inHotseat?: boolean
    gutterItem?: GutterItem
    gutterSide?: Side
-   reactTextWrapperRef: React.RefObject<HTMLDivElement>
+   reactTextWrapperRef: React.RefObject<HTMLDivElement> | null
    side: Side
 }
 

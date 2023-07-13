@@ -455,17 +455,17 @@ class BoardStore extends Store<typeof BoardRecord, BoardRecord> {
 
                   // TODO (remove this eventually)
                   Array.from(cardStore.records.values()).forEach(async (card) => {
-                     // const oldTextUpdate = await updateParagraph(card.oldText)
-                     // if (oldTextUpdate) {
-                     //    card.update({ oldText: oldTextUpdate })
-                     // }
+                     const oldTextUpdate = await updateParagraph(card.oldText)
+                     if (oldTextUpdate) {
+                        card.update({ oldText: oldTextUpdate })
+                     }
 
-                     // if (card.updatedText) {
-                     //    const updatedTextUpdate = await updateParagraph(card.updatedText)
-                     //    if (updatedTextUpdate) {
-                     //       card.update({ updatedText: updatedTextUpdate })
-                     //    }
-                     // }
+                     if (card.updatedText) {
+                        const updatedTextUpdate = await updateParagraph(card.updatedText)
+                        if (updatedTextUpdate) {
+                           card.update({ updatedText: updatedTextUpdate })
+                        }
+                     }
 
                      if (card.plainText === "" && card.cardLocationType !== CardLocationType.PARAGRAPH) {
                         card.toggleTextCollapsed(true)

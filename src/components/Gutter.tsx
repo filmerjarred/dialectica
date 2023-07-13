@@ -69,6 +69,7 @@ export const Gutter = observer(function Gutter({ side, card }: { side: Side; car
                      gutterSide={side}
                      gutterOwner={card}
                      side={card.side}
+                     reactTextWrapperRef={null}
                   ></Card>
                )
             }
@@ -91,6 +92,7 @@ export const Gutter = observer(function Gutter({ side, card }: { side: Side; car
                      gutterSide={side}
                      gutterOwner={card}
                      side={card.side}
+                     reactTextWrapperRef={null}
                   ></Card>
                )
             }
@@ -111,6 +113,7 @@ export const Gutter = observer(function Gutter({ side, card }: { side: Side; car
                      gutterItem={item}
                      gutterSide={side}
                      side={card.side}
+                     reactTextWrapperRef={null}
                   ></Card>
                )
             }
