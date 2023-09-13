@@ -158,7 +158,7 @@ export default function Editor({
                   <RichTextPlugin
                      contentEditable={
                         <div
-                           className="editor scrollable"
+                           className="editor"
                            onDragStart={(e) => {
                               // e.preventDefault()
                               // e.stopPropagation()

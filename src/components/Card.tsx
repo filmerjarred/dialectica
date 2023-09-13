@@ -116,10 +116,6 @@ function CardComponent({
    // HANDLE FOCUS: If card data indicates focus then draw focus to correct element
    const cardRef = useCallback(
       (node: HTMLElement) => {
-         // const cardRef = useRef()
-         // useLayoutEffect(() => {
-         //    const node = cardRef.current
-
          if (!node || isTop || overhead || gutterItem) return
 
          if (card.local.shouldCenterScreen) {
@@ -237,7 +233,7 @@ function CardComponent({
       >
          {inHotseat ? <Gutter card={card} side={Side.LEFT}></Gutter> : null}
 
-         <div ref={reactCardWrapperRef} className={`card-wrapper ${inHotseat ? "hotseat" : ""}`}>
+         <div ref={dropRef} className={`card-wrapper ${inHotseat ? "hotseat" : ""}`}>
             <ArcherElement id={getCardBorderArcherId({ card, gutterItem })} relations={relations}>
                <div
                   tabIndex={-1}
@@ -252,7 +248,6 @@ function CardComponent({
                      e.preventDefault()
                      e.stopPropagation()
                   }}
-                  ref={dropRef}
                   // @ts-ignores
 
                   className={className}
@@ -376,7 +371,7 @@ function CardComponent({
                         ) : null}
 
                         {/* text */}
-                        <div className="text-wrapper" ref={reactTextWrapperRef}>
+                        <div className="text-wrapper overflow-y-auto overflow-x-hidden" ref={reactTextWrapperRef}>
                            {(() => {
                               if (
                                  isTop ||

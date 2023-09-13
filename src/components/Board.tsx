@@ -60,10 +60,10 @@ export const Board = observer(function Board({ board }: { board: BoardRecord }) 
                enableTextSelection: true,
                transformOrigin: { x: 0.5, y: 0.5 },
                // initialX: -5000,
-               // beforeWheel: function (e) {
-               // allow wheel-zoom only if altKey is down. Otherwise - ignore
-               // return cardStore.isHotseat
-               // },
+               beforeWheel: function (e) {
+                  // allow wheel-zoom only if altKey is down. Otherwise - ignore
+                  return !!cardStore.currentSelected
+               },
 
                beforeMouseDown: function (e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
                   // @ts-ignore

@@ -132,7 +132,7 @@ export const CardContextMenu = observer(function CardContextMenu() {
 
          <Separator />
 
-         {!card.isMine ? <Command id="ADD_COMMENT" card={card}></Command> : null}
+         <Command id="ADD_COMMENT" card={card}></Command>
 
          <Command id="NEW_CARD_ABOVE" card={card}></Command>
          <Command id="NEW_CARD_BELOW" card={card}></Command>

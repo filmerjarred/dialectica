@@ -12,10 +12,11 @@ import { lexicalToText } from "./lexicalToText"
 import { TodoRecord, todoStore } from "./todo.data"
 import { makeLexicalWikilink } from "../components/Todo"
 import { toast } from "react-toastify"
-import { LexicalEditor } from "lexical"
+import { $getSelection, $isRangeSelection, $isTextNode, createEditor, LexicalEditor } from "lexical"
 import { tagInfo } from "./tagInfo"
 import { tagStore } from "./tag.data"
 import { cardIntentionStore } from "./cardIntention.data"
+import { getNodeList } from "./editor/nodes/NodeList"
 
 export const oppositeSide = (side: Side) => (side === Side.LEFT ? Side.RIGHT : Side.LEFT)
 export enum Side {
@@ -619,6 +620,76 @@ export class CardRecord extends Record<CardRecord> {
 
    // ==== UI Functions ======
 
+   split() {
+      // get current cursor position
+      // split the text
+      
+      const editor = this.localNonObserved.lexicalEditor
+      if (!editor) return
+
+      const firstHalf = ''
+      const secondHalf = ''
+
+      editor.update(() => {
+         const selection = $getSelection()
+         if (!$isRangeSelection(selection)) return
+         
+         const selectedNode = selection?.getNodes()[0]
+         if (!selectedNode) return
+
+         // if it's a text node, split it
+         if ($isTextNode(selectedNode)) {
+            selectedNode.splitText(selection.anchor.offset)
+         }
+         
+         editor.update(() => {
+            const selection = $getSelection()
+            if (!$isRangeSelection(selection)) return
+            
+            const selectedNode = selection?.getNodes()[0]
+            if (!selectedNode) return
+
+            const originalState = editor.getEditorState()
+
+            const ce = createEditor({nodes: getNodeList("Card")})
+            
+            const clonedEditorState = ce.parseEditorState(originalState.toJSON())
+            ce.setEditorState(clonedEditorState)
+
+            // remove all nodes before selected value in clone
+            const toRemove = Array.from(clonedEditorState._nodeMap.values())
+            .filter((n, i) => {
+               // const node = originalState._nodeMap.get(n.__key)
+               const node = Array.from(originalState._nodeMap.values())[i]
+               return node.isBefore(selectedNode) && !node.isParentOf(selectedNode)
+            })
+
+            ce.update(() => {
+               toRemove.forEach(n => {
+                  n.remove()
+               })
+            }, {onUpdate: () => {
+                ce.getEditorState().read(() => {
+                  this.newPeer({updatedText: JSON.stringify(ce.getEditorState().toJSON())})
+               })
+            }})
+            
+            // remove all nodes after in the original
+            Array.from(originalState._nodeMap.values())
+            .filter(n => {
+               return !n.isBefore(selectedNode) && !n.isParentOf(selectedNode)
+            })
+            .forEach(n => {
+               n.remove()
+            })
+            
+         })
+      })
+
+
+      // peer.focusCursor()
+   }
+
    getGutterItems(side: Side): GutterItem[] {
       if (side === Side.LEFT) return this.myUserData.leftGutterItems || []
       else return this.myUserData.rightGutterItems || []
@@ -775,7 +846,7 @@ export class CardRecord extends Record<CardRecord> {
          this.cardLocationType === CardLocationType.PARAGRAPH && !this.parentId ? "PARAPHRASE" : null
 
       const newCard = cardStore.create({
-         order: this.order + 1,
+         order: this.order + 0.5,
          parentId: this.parentId,
          boardId: this.boardId,
          ownerUserId: user.uid,

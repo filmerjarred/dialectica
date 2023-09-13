@@ -171,4 +171,9 @@ export const cardCommandMap: { [i: string]: CardCommand } = {
       shortcut: "alt+w",
       fn: (card) => card.toggleRelatedCollapsed(),
    },
+
+   SPLIT: {
+      shortcut: "alt+h",
+      fn: (card) => card.split(),
+   },
 }

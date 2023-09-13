@@ -263,7 +263,7 @@ export class DialecticaParagraphNode extends ParagraphNode {
 }
 
 export function $insertDialecticaParagraphNode(card: CardRecord) {
-   if (card.isMine) return
+   // if (card.isMine) return
 
    if (!card.localNonObserved.lexicalEditor) {
       console.error("No editor on card", card.id)
