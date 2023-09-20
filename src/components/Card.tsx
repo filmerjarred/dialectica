@@ -332,6 +332,7 @@ function CardComponent({
                               <input
                                  tabIndex={1}
                                  onFocus={(e) => {
+                                    // @ts-ignore
                                     if (e.button !== 0) return
                                     !isTop && !overhead && card.handleInputClick("title")
                                  }}
