@@ -60,7 +60,7 @@ export const Board = observer(function Board({ board }: { board: BoardRecord }) 
                enableTextSelection: true,
                transformOrigin: { x: 0.5, y: 0.5 },
                // initialX: -5000,
-               beforeWheel: function (e) {
+               beforeWheel: function () {
                   // allow wheel-zoom only if altKey is down. Otherwise - ignore
                   // return e.target.matches("div[is_card], div[is_card] *") || !!cardStore.currentSelected
                },
