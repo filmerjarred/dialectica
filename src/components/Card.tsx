@@ -87,9 +87,9 @@ function CardComponent({
 
    const dropRef = !gutterItem
       ? useCardDrop(card, (card) => ({
-           order: card.order + 0.1,
-           parentId: card.parentId,
-        }))[1]
+         order: card.order + 0.1,
+         parentId: card.parentId,
+      }))[1]
       : null
 
    const handleContextMenu = useCardContextMenu()
@@ -139,7 +139,7 @@ function CardComponent({
                if (editor.getRootElement() !== document.activeElement) {
                   card.local.cursorFocusPosition = undefined
 
-                  editor.focus(() => {}, { defaultSelection: "rootStart" })
+                  editor.focus(() => { }, { defaultSelection: "rootStart" })
                }
             }
 
@@ -266,16 +266,16 @@ function CardComponent({
                            ) : null}
 
                            {!isTop &&
-                           !overhead &&
-                           !card.exploded &&
-                           !(
-                              // If it's a comment on one of my cards and I haven't given my tags, don't show the OG owners tags
-                              (
-                                 card.cardLocationType === CardLocationType.PARAGRAPH &&
-                                 !card.isMine &&
-                                 !card.partnerTagIds.length
-                              )
-                           ) ? (
+                              !overhead &&
+                              !card.exploded &&
+                              !(
+                                 // If it's a comment on one of my cards and I haven't given my tags, don't show the OG owners tags
+                                 (
+                                    card.cardLocationType === CardLocationType.PARAGRAPH &&
+                                    !card.isMine &&
+                                    !card.partnerTagIds.length
+                                 )
+                              ) ? (
                               <Tags card={card} tags={card.ownerTagIds} tagsAreMine={card.isMine}></Tags>
                            ) : null}
 
@@ -331,16 +331,13 @@ function CardComponent({
                            <span className="flex pb-2 px-1 max-w-[562px]" onClick={(e) => card.focusCursor("title")}>
                               <input
                                  tabIndex={1}
-                                 onFocus={() => !isTop && !overhead && card.handleInputClick("title")}
+                                 onFocus={(e) => {
+                                    if (e.button !== 0) return
+                                    !isTop && !overhead && card.handleInputClick("title")
+                                 }}
                                  onMouseDown={(e) => {
                                     if (e.button !== 0) return
-
-                                    if (card.local.textCollapsed) {
-                                       e.preventDefault()
-                                       card.toggleTextCollapsed(false)
-                                    } else {
-                                       card.focusCursor("title")
-                                    }
+                                    card.focusCursor("title")
                                  }}
                                  placeholder={"Headline..."}
                                  className={`title ellipsis ${card.local.textCollapsed ? "cursor-pointer" : ""}`}
@@ -388,7 +385,7 @@ function CardComponent({
                                     // @ts-ignore
                                     <SquiggleEditor
                                        defaultCode={card.squiggleCode}
-                                       onChange={function Ra() {}}
+                                       onChange={function Ra() { }}
                                        onCodeChange={function Ra(code) {
                                           card.update({ squiggleCode: code })
                                        }}

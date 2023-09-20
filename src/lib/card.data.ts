@@ -623,17 +623,17 @@ export class CardRecord extends Record<CardRecord> {
    split() {
       // get current cursor position
       // split the text
-      
+
       const editor = this.localNonObserved.lexicalEditor
       if (!editor) return
 
-      const firstHalf = ''
-      const secondHalf = ''
+      const firstHalf = ""
+      const secondHalf = ""
 
       editor.update(() => {
          const selection = $getSelection()
          if (!$isRangeSelection(selection)) return
-         
+
          const selectedNode = selection?.getNodes()[0]
          if (!selectedNode) return
 
@@ -641,51 +641,53 @@ export class CardRecord extends Record<CardRecord> {
          if ($isTextNode(selectedNode)) {
             selectedNode.splitText(selection.anchor.offset)
          }
-         
+
          editor.update(() => {
             const selection = $getSelection()
             if (!$isRangeSelection(selection)) return
-            
+
             const selectedNode = selection?.getNodes()[0]
             if (!selectedNode) return
 
             const originalState = editor.getEditorState()
 
-            const ce = createEditor({nodes: getNodeList("Card")})
-            
+            const ce = createEditor({ nodes: getNodeList("Card") })
+
             const clonedEditorState = ce.parseEditorState(originalState.toJSON())
             ce.setEditorState(clonedEditorState)
 
             // remove all nodes before selected value in clone
-            const toRemove = Array.from(clonedEditorState._nodeMap.values())
-            .filter((n, i) => {
+            const toRemove = Array.from(clonedEditorState._nodeMap.values()).filter((n, i) => {
                // const node = originalState._nodeMap.get(n.__key)
                const node = Array.from(originalState._nodeMap.values())[i]
                return node.isBefore(selectedNode) && !node.isParentOf(selectedNode)
             })
 
-            ce.update(() => {
-               toRemove.forEach(n => {
-                  n.remove()
-               })
-            }, {onUpdate: () => {
-                ce.getEditorState().read(() => {
-                  this.newPeer({updatedText: JSON.stringify(ce.getEditorState().toJSON())})
-               })
-            }})
-            
+            ce.update(
+               () => {
+                  toRemove.forEach((n) => {
+                     n.remove()
+                  })
+               },
+               {
+                  onUpdate: () => {
+                     ce.getEditorState().read(() => {
+                        this.newPeer({ updatedText: JSON.stringify(ce.getEditorState().toJSON()) })
+                     })
+                  },
+               }
+            )
+
             // remove all nodes after in the original
             Array.from(originalState._nodeMap.values())
-            .filter(n => {
-               return !n.isBefore(selectedNode) && !n.isParentOf(selectedNode)
-            })
-            .forEach(n => {
-               n.remove()
-            })
-            
+               .filter((n) => {
+                  return !n.isBefore(selectedNode) && !n.isParentOf(selectedNode)
+               })
+               .forEach((n) => {
+                  n.remove()
+               })
          })
       })
-
 
       // peer.focusCursor()
    }
@@ -761,7 +763,7 @@ export class CardRecord extends Record<CardRecord> {
    focusCursor(element?: "text" | "title", position?: number) {
       cardStore.setSelected(this)
 
-      if (this.local.textCollapsed) {
+      if (element === "text" && this.local.textCollapsed) {
          this.toggleTextCollapsed(false)
       }
 

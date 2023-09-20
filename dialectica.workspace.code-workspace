@@ -1,13 +1,13 @@
 {
-   "folders": [
-      {
-         "path": "c:\\repos\\dialectica"
-      }
-   ],
-   "settings": {
-      "files.autoSave": "off",
-      "pasteImage.basePath": "/",
-      "pasteImage.path": "",
-      "pasteImage.prefix": "/"
-   }
+    "folders": [
+        {
+            "path": "c:\\repos\\dialectica"
+        }
+    ],
+    "settings": {
+        "files.autoSave": "off",
+        "pasteImage.basePath": "/",
+        "pasteImage.path": "",
+        "pasteImage.prefix": "/"
+    }
 }

@@ -29,6 +29,7 @@ import { makeAutoObservable, runInAction } from "mobx"
 import NodeList, { getNodeList } from "../../nodes/NodeList"
 import { useDrag } from "react-dnd"
 import { DragAndDropTypes } from "../../../../components/Board"
+import { DialecticaSentenceNode } from "../DialecticaSentencePlugin"
 
 type Config = {
    searchString: string | null
@@ -323,9 +324,8 @@ function zComponent({ node }: { node: WikiLinkNode }) {
                      if (!card.title) return null
 
                      const isHighlighted = index === node.uiState.highlightedLine
-                     const className = `cursor-pointer ellipsis p-1 border border-black border-t-0 ${
-                        isHighlighted ? "bg-[#00a8df]" : ""
-                     }`
+                     const className = `cursor-pointer ellipsis p-1 border border-black border-t-0 ${isHighlighted ? "bg-[#00a8df]" : ""
+                        }`
                      return (
                         <span
                            onMouseOver={() => node.uiState.setHighlightedLine(index)}
@@ -476,7 +476,7 @@ export function $isWikiLinkNode(node: LexicalNode | null | undefined): node is W
    return node instanceof WikiLinkNode
 }
 
-function findAndTransformWikiLink(node: TextNode) {
+function findAndTransformWikiLink(node: DialecticaSentenceNode) {
    const text = node.getTextContent()
 
    const wikilinks = text.match(/\[\[/)
@@ -497,11 +497,9 @@ function useWikiLinks(editor: LexicalEditor): void {
    if (editor._config.namespace === "ReadOnlyEditor") return
 
    useEffect(() => {
-      return editor.registerNodeTransform(TextNode, (node) => findAndTransformWikiLink(node))
+      return editor.registerNodeTransform(DialecticaSentenceNode, (node) => findAndTransformWikiLink(node))
    }, [editor])
 }
-
-let x = true
 
 export default function WikiLinksPlugin(): JSX.Element | null {
    const [editor] = useLexicalComposerContext()

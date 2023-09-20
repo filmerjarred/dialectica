@@ -62,7 +62,7 @@ export const Board = observer(function Board({ board }: { board: BoardRecord }) 
                // initialX: -5000,
                beforeWheel: function (e) {
                   // allow wheel-zoom only if altKey is down. Otherwise - ignore
-                  return !!cardStore.currentSelected
+                  // return e.target.matches("div[is_card], div[is_card] *") || !!cardStore.currentSelected
                },
 
                beforeMouseDown: function (e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
@@ -131,7 +131,7 @@ export const Board = observer(function Board({ board }: { board: BoardRecord }) 
       <DndProvider backend={HTML5Backend}>
          {/* holds everything below header and between sidebars */}
          <div className="board-wrapper">
-            {}
+            { }
             {user.uiShowOwnerExplorer ? (
                <div className="flex border-r border-slate-300">
                   <Explorer side={Side.LEFT} />
@@ -149,17 +149,17 @@ export const Board = observer(function Board({ board }: { board: BoardRecord }) 
             >
                {uiStore.showFinder ? <Finder /> : null}
 
-               {}
+               { }
                {/* Stretches wide past window and handles the pan and zoom */}
                <div
                   className="infinite-canvas"
                   ref={boardCanvasRef}
-                  // onClick={(e) => {
-                  //    // @ts-ignore
-                  //    if (!e.target.matches("div[is_card], div[is_card] *")) {
-                  //       cardStore.setSelected(null)
-                  //    }
-                  // }}
+               // onClick={(e) => {
+               //    // @ts-ignore
+               //    if (!e.target.matches("div[is_card], div[is_card] *")) {
+               //       cardStore.setSelected(null)
+               //    }
+               // }}
                >
                   {/* CLAIM AND POSITIONS BOARD */}
                   <ArcherContainer
