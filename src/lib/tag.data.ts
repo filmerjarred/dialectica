@@ -35,7 +35,7 @@ class TagStore {
 
    tagsByIntention(cardIntentionTypeId: string | null) {
       const types = this.tagTypeInfo()
-         .filter((t) => !t.intentionTypes || t.intentionTypes.includes(cardIntentionTypeId!))
+         .filter((t) => !t.intentionTypes || !cardIntentionTypeId || t.intentionTypes.includes(cardIntentionTypeId))
          .map((t) => t.tagTypeId)
 
       return this.tags().filter((t) => {

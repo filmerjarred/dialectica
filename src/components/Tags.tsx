@@ -41,9 +41,7 @@ export function Tags({ card, tags: tagIds, tagsAreMine }: { card: CardRecord; ta
                })}
             </span>
          ) : // no tags
-         tagsAreMine ? (
-            <span className="opacity-0 hover:opacity-100 text-slate-600">Seems...</span>
-         ) : null}
+            <span className="opacity-0 hover:opacity-100 text-slate-600">Seems...</span>}
       </span>
    )
 }

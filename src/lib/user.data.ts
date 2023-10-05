@@ -1,7 +1,8 @@
 import autoBind from "auto-bind"
-import { observable } from "mobx"
+import { computed, observable } from "mobx"
 import { Record, Store } from "./makeStore"
 import { getUser } from "./useUser"
+import { boardStore } from "./board.data"
 
 export interface BoardUIData {
    focusedCardId: string
@@ -58,6 +59,14 @@ export class UserRecord extends Record<UserRecord> {
 
    //    return uiData
    // }
+
+   @computed
+   get isSpectator() {
+      return (
+         !boardStore.currentSelected?.userIds.includes(this.id) &&
+         boardStore.currentSelected?.spectatorUserIds.includes(this.id)
+      )
+   }
 
    toggleShowHelp() {
       this.update({ uiShowHelp: !this.uiShowHelp })

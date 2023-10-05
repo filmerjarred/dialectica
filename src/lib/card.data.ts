@@ -838,7 +838,7 @@ export class CardRecord extends Record<CardRecord> {
 
       if (this.isMine) return true
 
-      return this.ownerWantsShown && this.partnerWantsShown
+      return userStore.getUserRecord().isSpectator || (this.ownerWantsShown && this.partnerWantsShown)
    }
 
    newPeer(data?: Partial<CardRecord>) {

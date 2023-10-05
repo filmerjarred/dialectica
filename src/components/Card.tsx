@@ -292,7 +292,7 @@ function CardComponent({
                               <img
                                  onClick={portraitClick}
                                  className="card-user  cursor-pointer m-1 ml-0"
-                                 src={card.rightUser.pic}
+                                 src={card.rightUser?.pic}
                               ></img>
                            ) : null}
                         </span>
@@ -318,7 +318,7 @@ function CardComponent({
                                  <img
                                     onClick={portraitClick}
                                     className="card-user  cursor-pointer m-1"
-                                    src={card.rightUser.pic}
+                                    src={card.rightUser?.pic}
                                  ></img>
                               ) : null}
                            </span>

@@ -88,7 +88,11 @@ export const App = observer(function App() {
          .loadRecords([
             doc(db, "UserData" + "/" + user.uid) as DocumentReference<UserRecord>,
             ...(board
-               ? board.userIds.map((userId) => doc(db, "UserData" + "/" + userId) as DocumentReference<UserRecord>)
+               ? _(board.userIds)
+                  .concat(board.spectatorUserIds)
+                  .uniq()
+                  .map((userId) => doc(db, "UserData" + "/" + userId) as DocumentReference<UserRecord>)
+                  .value()
                : []),
          ])
          .values()
@@ -168,9 +172,8 @@ export const App = observer(function App() {
 
    return (
       <div
-         className={`app ${cardStore.isHotseat ? "hotseat-mode" : ""} ${
-            cardStore.currentSelected ? "card-is-selected" : ""
-         }`}
+         className={`app ${cardStore.isHotseat ? "hotseat-mode" : ""} ${cardStore.currentSelected ? "card-is-selected" : ""
+            }`}
       >
          <div className="app-header fade-target">
             <div className="header-content text-sm">
@@ -213,7 +216,7 @@ export const App = observer(function App() {
                      </span>
 
                      <button
-                        hidden={!board.hasUnrevealedChanges}
+                        hidden={!board.hasUnrevealedChanges || userRecord.isSpectator}
                         className="mr-2 disabled:opacity-50"
                         onClick={board.revealLatest}
                      >
