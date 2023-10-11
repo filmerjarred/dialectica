@@ -451,7 +451,9 @@ export class CardRecord extends Record<CardRecord> {
 
    @computed
    get text() {
-      return this.isMine && this.updatedText !== null ? this.updatedText : this.oldText
+      return (this.isMine || userStore.getUserRecord().isSpectator) && this.updatedText !== null
+         ? this.updatedText
+         : this.oldText
    }
 
    @computed
