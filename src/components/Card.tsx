@@ -152,6 +152,15 @@ function CardComponent({
       [card, card.isSelected, card.local.shouldFocusCursor, card.local.shouldCenterScreen]
    )
 
+   // const webviewRef = useRef(null)
+   // useEffect(() => {
+   //    if (webviewRef.current) {
+   //       webviewRef.current.addEventListener('dom-ready', () => {
+   //          webviewRef.current.setZoomLevel(-3)
+   //       })
+   //    }
+   // })
+
    // useEffect(() => {
    //    const resizeObserver = new ResizeObserver((entries) => {
    //       if (!reactCardWrapperRef.current || !reactTextWrapperRef.current) return
@@ -391,6 +400,25 @@ function CardComponent({
                                           card.update({ squiggleCode: code })
                                        }}
                                     />
+                                 )
+
+                              if (card.cardMediumType === CardMediumType.EMBED)
+                                 return (
+                                    <>
+                                       <input
+                                          className="outline-none w-full p-2 ml-3"
+                                          placeholder="Url"
+                                          defaultValue={card.embedUrl}
+                                          onChange={(e) => card.update({ embedUrl: e.target.value })}
+                                       ></input>
+
+                                       <Editor cardOrTodo={card} textOrTitle="text"></Editor>
+
+
+                                       {/* {card.embedUrl ? (
+                                          <webview src={card.embedUrl} ref={webviewRef} style={{ height: '700px' }} />
+                                       ) : null} */}
+                                    </>
                                  )
 
                               if (card.cardMediumType === CardMediumType.MANIFOLD)

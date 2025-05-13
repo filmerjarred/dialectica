@@ -118,6 +118,7 @@ export const CardContextMenu = observer(function CardContextMenu() {
             <Command id="FREE_TEXT" card={card}></Command>
             <Command id="SQUIGGLE" card={card}></Command>
             <Command id="MANIFOLD" card={card}></Command>
+            <Command id="EMBED" card={card}></Command>
          </Submenu>
 
          <Separator />

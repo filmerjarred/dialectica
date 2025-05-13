@@ -28,6 +28,7 @@ import { isMobile } from "./lib/isMobile"
 import { Mobile } from "./components/Mobile"
 import { ArcherContainerRef } from "react-archer"
 import { TagContextMenu } from "./components/TagContextMenu"
+import { logReferer } from "./lib/logReferer"
 
 type CurrentFocused = { card: CardRecord; element: string } | null
 
@@ -45,6 +46,10 @@ export const App = observer(function App() {
    const [spectatorUpdating, setSpectatorUpdating] = useState(false)
 
    const location = useLocation()
+
+   if (document.referrer !== '' && !document.referrer.includes('https://dialectica.app/') && !document.referrer.includes('localhost')) {
+      logReferer()
+   }
 
    const { userLoading, user } = useUserLoading()
 

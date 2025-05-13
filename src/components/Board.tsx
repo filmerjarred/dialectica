@@ -114,6 +114,11 @@ export const Board = observer(function Board({ board }: { board: BoardRecord }) 
       }
    }, [cardStore.loaded])
 
+   // document title
+   useEffect(() => {
+      document.title = board.name
+   }, [board.name])
+
    if (!cardStore.loaded) return <Loading />
 
    if (revealChanges) return <Loading />

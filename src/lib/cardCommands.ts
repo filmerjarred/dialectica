@@ -31,6 +31,12 @@ export const cardCommandMap: { [i: string]: CardCommand } = {
       },
    },
 
+   EMBED: {
+      fn: (card) => {
+         card.update({ cardMediumType: CardMediumType.EMBED })
+      },
+   },
+
    MANIFOLD: {
       fn: (card) => {
          card.update({ cardMediumType: CardMediumType.MANIFOLD })

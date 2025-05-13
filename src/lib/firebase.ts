@@ -1,6 +1,7 @@
 import { initializeApp, setLogLevel } from "firebase/app"
 import { getFirestore } from "firebase/firestore"
 import { isDev } from "./isDev"
+import { getAnalytics } from "firebase/analytics";
 
 export const firebaseConfig = isDev
    ? {
@@ -38,5 +39,6 @@ export const firebaseConfig = isDev
 
 export const app = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
+const analytics = getAnalytics(app);
 
 // setLogLevel("debug")

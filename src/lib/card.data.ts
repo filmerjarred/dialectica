@@ -43,6 +43,7 @@ export enum CardMediumType {
    FREE_TEXT = "FREE_TEXT",
    SQUIGGLE = "SQUIGGLE",
    MANIFOLD = "MANIFOLD",
+   EMBED = "EMBED",
 }
 
 export function toUpperFirst(tag: string) {
@@ -127,6 +128,7 @@ export class CardRecord extends Record<CardRecord> {
 
    @observable squiggleCode?: string
    @observable manifoldUrl?: string
+   @observable embedUrl?: string
 
    @observable order!: number
    @observable parentId!: string | null
